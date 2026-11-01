@@ -36,6 +36,14 @@ public API and the specs may change between minor versions).
   development data, not the pre-registered assessment.
 
 ### Fixed
+- The comparison gate passed when no candidate could have failed. When A's yield is
+  below the margin in every cluster, including when both configurations submit
+  nothing (a broken runner or grader looks like this), every B was non-inferior by
+  construction, and `aureproof compare` exited 0. A pass now stands only if B with
+  yield 0 in every cluster would not also have passed; otherwise the provisional
+  outcome is pass and the outcome is inconclusive (specs/decision §5 rule 5,
+  vectors D-11 to D-15). This amends `decision/v0.1` after 0.1.0a1; no assessment has
+  run under it.
 - The SBOM was kept only as a workflow-run artifact, which expires, not attached to
   the GitHub release as the 0.1.0a1 notes said. `release.yml` has a new `attach` job:
   after PyPI accepts the files it signs the wheel, the sdist and the SBOM with the
