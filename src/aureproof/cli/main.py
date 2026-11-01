@@ -11,6 +11,7 @@ or not re-scorable); 2 = usage or I/O error (missing path, symlink, unsafe path)
 from __future__ import annotations
 
 import json
+import os
 import secrets
 import sys
 from collections import Counter
@@ -700,9 +701,8 @@ def task_probe(
     from aureproof.oracles.calibration import calibrate
     from aureproof.oracles.probe import (
         ProbeError,
-        SingleShotConfig,
         bandit_baseline,
-        provider_model,
+        probe_config,
         saturation,
         single_shot_baseline,
         with_probe,
@@ -715,7 +715,7 @@ def task_probe(
         typer.echo(f"error: {out} exists", err=True)
         raise typer.Exit(2)
     try:
-        model_id = provider_model(model) if model is not None else None
+        config = probe_config(model, os.environ) if model is not None else None
     except ValueError as error:
         typer.echo(f"error: {error}", err=True)
         raise typer.Exit(2) from None
@@ -725,10 +725,14 @@ def task_probe(
         typer.echo("error: the Bandit probe needs the `baseline` extra", err=True)
         raise typer.Exit(2) from None
     single = None
-    if model_id is not None:
-        config = SingleShotConfig(model=model_id)
+    if config is not None:
         try:
-            single = single_shot_baseline(root, task_id, config, probe.AnthropicClient(config))
+            client: probe.ModelClient = (
+                probe.AnthropicClient(config)
+                if config.service is None
+                else probe.OpenAICompatibleClient(config, os.environ)
+            )
+            single = single_shot_baseline(root, task_id, config, client)
         except ModuleNotFoundError:
             typer.echo("error: the single-shot probe needs the `inspect` extra", err=True)
             raise typer.Exit(2) from None

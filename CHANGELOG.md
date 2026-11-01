@@ -12,6 +12,13 @@ public API and the specs may change between minor versions).
 ## [Unreleased]
 
 ### Added
+- `aureproof task probe --model openai-api/<service>/<model>` runs the single-shot
+  baseline against an OpenAI-compatible endpoint, reading `<SERVICE>_BASE_URL` (https
+  only) and `<SERVICE>_API_KEY` as Inspect does. One Chat Completions request per
+  variant, no retries, standard library only; the endpoint is part of the probe's
+  system identity, and Anthropic probe identities are unchanged.
+  `docs/research/difficulty-probe.md` records 126 probes of the six public pairs by
+  seven open models, three runs each, with every run in `docs/research/data/`.
 - The reference subject runs on OpenAI-compatible endpoints as
   `openai-api/<service>/<model>`, through Inspect's provider (the `inspect` extra now
   pins `openai==3.30.0`). Preflight refuses a missing `<SERVICE>_BASE_URL`, a missing
