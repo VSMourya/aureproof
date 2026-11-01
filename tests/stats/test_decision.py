@@ -166,3 +166,73 @@ def test_the_margin_is_the_decimal_the_protocol_wrote() -> None:
     assert decision.mean_difference == "-1/20"
     assert decision.outcome == "inconclusive", decision.reason
     assert "-1/20" in decision.reason and "72057594037927936" not in decision.reason
+
+
+@pytest.mark.parametrize("case", VECTORS["guardrail_cases"], ids=lambda c: c["id"])
+def test_guardrail_vector(case: dict[str, Any]) -> None:
+    protocol = DecisionProtocol.model_validate(case["protocol"])
+    decision = decide(protocol, [ClusterRow.model_validate(r) for r in case["rows"]])
+    exp = case["expected"]
+    assert decision.outcome == exp["outcome"], decision.reason
+    assert decision.provisional_outcome == exp["provisional_outcome"]
+    assert _frac(decision.mean_difference) == _frac(exp["mean_difference"])
+    assert len(decision.guardrails) == len(exp["guardrails"])
+    for got, want in zip(decision.guardrails, exp["guardrails"], strict=True):
+        assert got.metric == want["metric"]
+        assert got.outcome == want["outcome"], got.reason
+        assert got.clusters == want["clusters"]
+        assert _frac(got.mean_difference) == _frac(want["mean_difference"])
+        assert got.ci.lower == pytest.approx(float(Fraction(want["lower"])), abs=0, rel=1e-15)
+        assert got.ci.upper == pytest.approx(float(Fraction(want["upper"])), abs=0, rel=1e-15)
+        assert f"guardrail {got.metric} {got.outcome}" in decision.reason
+
+
+def test_guardrail_vectors_close_both_restraint_games() -> None:
+    titles = " ".join(c["title"] for c in VECTORS["guardrail_cases"]).lower()
+    for word in ("withholding", "selective silence", "unadjudicated"):
+        assert word in titles
+    outcomes = {c["expected"]["outcome"] for c in VECTORS["guardrail_cases"]}
+    assert outcomes == {"pass", "fail", "inconclusive"}
+
+
+def test_without_the_guardrail_withholding_and_silence_pass() -> None:
+    """The games G-01 and G-02 close: the same rows pass when no guardrail is registered."""
+    for case_id in ("G-01", "G-02"):
+        case = next(c for c in VECTORS["guardrail_cases"] if c["id"] == case_id)
+        protocol = DecisionProtocol.model_validate({**case["protocol"], "guardrails": []})
+        rows = [ClusterRow.model_validate(r) for r in case["rows"]]
+        assert decide(protocol, rows).outcome == "pass"
+
+
+def test_a_protocol_without_guardrails_keeps_its_signed_identity() -> None:
+    """Registered before guardrails existed; the sealed episodes name this identity."""
+    path = ROOT / "protocols/m2-slice-2/protocol.json"
+    protocol = DecisionProtocol.model_validate_json(path.read_bytes())
+    assert protocol.identity == (
+        "sha256:368664cb3802192b43d54b8e61899ca75ddca3b7c2413351f51a54ad69e7c382"
+    )
+    assert "guardrails" not in protocol.model_dump(mode="json")
+    guarded = DecisionProtocol.model_validate(
+        {
+            **protocol.model_dump(mode="json"),
+            "guardrails": [{"metric": "known_defect_recall", "margin": 0.1}],
+        }
+    )
+    assert guarded.model_dump(mode="json")["guardrails"] == [
+        {"metric": "known_defect_recall", "margin": 0.1}
+    ]
+    assert guarded.identity != protocol.identity
+
+
+def test_credited_defects_cannot_exceed_the_defects_present() -> None:
+    with pytest.raises(ValidationError, match="credited"):
+        ClusterRow(
+            cluster_id="c1",
+            a_confirmed=1,
+            a_submitted=1,
+            b_confirmed=1,
+            b_submitted=1,
+            difference=None,
+            a_credited=2,
+            a_positives=1,
+        )

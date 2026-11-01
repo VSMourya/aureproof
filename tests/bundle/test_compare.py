@@ -180,3 +180,37 @@ def test_compare_cli_requires_signatures_when_asked() -> None:
     )
     assert result.exit_code == 2  # type: ignore[attr-defined]
     assert "not signed" in result.output  # type: ignore[attr-defined]
+
+
+@pytest.mark.parametrize("name", OUTCOMES)
+def test_cluster_rows_carry_the_recall_the_metric_reports(name: str) -> None:
+    """The guardrail's per-cluster support adds up to each side's known-defect recall."""
+    result = compare(*_example(name))
+    rows = result.decision.cluster_table
+    for side, summary in (("a", result.a), ("b", result.b)):
+        credited = sum(getattr(r, f"{side}_credited") for r in rows)
+        present = sum(getattr(r, f"{side}_positives") for r in rows)
+        assert f"{credited}/{present}" == summary.metrics["known_defect_recall"]
+        assert present > 0
+
+
+def test_the_report_lists_each_guardrail() -> None:
+    import dataclasses
+
+    from aureproof.cli.report import render_comparison
+    from aureproof.contracts.decision import GuardrailResult, Interval
+
+    result = compare(*_example("pass"))
+    guard = GuardrailResult(
+        metric="known_defect_recall",
+        margin=0.1,
+        outcome="fail",
+        reason="CI upper bound -2/3 < -margin -1/10",
+        clusters=8,
+        mean_difference="-2/3",
+        ci=Interval(lower=-2 / 3, upper=-2 / 3),
+    )
+    decision = result.decision.model_copy(update={"guardrails": [guard]})
+    text = render_comparison(dataclasses.replace(result, decision=decision))
+    assert "Guardrail known_defect_recall (margin 0.1): fail; mean difference -2/3" in text
+    assert "Guardrail" not in render_comparison(result)

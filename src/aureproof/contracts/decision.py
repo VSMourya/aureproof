@@ -8,9 +8,9 @@ A protocol is pre-registered: its identity is the digest of its content, and
 
 from __future__ import annotations
 
-from typing import Annotated, Literal, Self
+from typing import Annotated, Any, Literal, Self
 
-from pydantic import Field, model_validator
+from pydantic import Field, SerializerFunctionWrapHandler, model_serializer, model_validator
 
 from aureproof.contracts._base import Contract, NonEmptyStr, PositiveInt
 from aureproof.contracts.specs import Budget, DigestRef, content_identity
@@ -60,6 +60,18 @@ class TestSpec(Contract):
     alpha: Annotated[float, Field(gt=0, lt=0.5)] = 0.025  # per side: 95% two-sided CI
 
 
+class Guardrail(Contract):
+    """A secondary metric that B must not lose by more than its own margin (§5, rule 6).
+
+    Strict confirmed yield is a precision, so volume cannot raise it, but restraint can:
+    reporting only the surest finding, or nothing where A did well (ADR-0006). Known-defect
+    recall moves the other way, so requiring both closes both games.
+    """
+
+    metric: Literal["known_defect_recall"]
+    margin: Annotated[float, Field(ge=0)]
+
+
 class Stopping(Contract):
     fixed_repetitions: Literal[True] = True
     peeking: Literal[False] = False
@@ -80,13 +92,25 @@ class DecisionProtocol(Contract):
     stopping: Stopping = Stopping()
     require_complete_adjudication: Literal[True] = True
     pilot_mde: Annotated[float, Field(ge=0)] | None = None
+    guardrails: list[Guardrail] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _unique_tasks(self) -> Self:
         ids = [t.task_identity for t in self.cohort]
         if len(ids) != len(set(ids)):
             raise ValueError("cohort tasks must be unique")
+        metrics = [g.metric for g in self.guardrails]
+        if len(metrics) != len(set(metrics)):
+            raise ValueError("a guardrail metric appears once")
         return self
+
+    @model_serializer(mode="wrap")
+    def _omit_no_guardrails(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        """No guardrails serialize as no key, so earlier protocols keep their identity."""
+        data: dict[str, Any] = handler(self)
+        if not self.guardrails:
+            data.pop("guardrails", None)
+        return data
 
     @property
     def identity(self) -> str:
@@ -102,11 +126,32 @@ class ClusterRow(Contract):
     a_unresolved: Annotated[int, Field(ge=0)] = 0
     b_unresolved: Annotated[int, Field(ge=0)] = 0
     difference: NonEmptyStr | None  # exact rational "p/q"; None when excluded
+    # Known-defect recall support, for a guardrail: defects credited / defects present.
+    a_credited: Annotated[int, Field(ge=0)] = 0
+    a_positives: Annotated[int, Field(ge=0)] = 0
+    b_credited: Annotated[int, Field(ge=0)] = 0
+    b_positives: Annotated[int, Field(ge=0)] = 0
+
+    @model_validator(mode="after")
+    def _credited_within_positives(self) -> Self:
+        if self.a_credited > self.a_positives or self.b_credited > self.b_positives:
+            raise ValueError("credited defects cannot exceed the defects present")
+        return self
 
 
 class Interval(Contract):
     lower: float | None  # None: unbounded (too few clusters)
     upper: float | None
+
+
+class GuardrailResult(Contract):
+    metric: Literal["known_defect_recall"]
+    margin: float
+    outcome: Literal["pass", "fail", "inconclusive"]
+    reason: NonEmptyStr
+    clusters: int
+    mean_difference: NonEmptyStr | None  # exact rational
+    ci: Interval
 
 
 class Decision(Contract):
@@ -123,3 +168,4 @@ class Decision(Contract):
     wilson_a: Interval
     wilson_b: Interval
     cluster_table: list[ClusterRow]
+    guardrails: list[GuardrailResult] = Field(default_factory=list)

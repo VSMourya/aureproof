@@ -152,6 +152,28 @@
       "title": "FailurePolicy",
       "type": "object"
     },
+    "Guardrail": {
+      "additionalProperties": false,
+      "description": "A secondary metric that B must not lose by more than its own margin (\u00a75, rule 6).\n\nStrict confirmed yield is a precision, so volume cannot raise it, but restraint can:\nreporting only the surest finding, or nothing where A did well (ADR-0006). Known-defect\nrecall moves the other way, so requiring both closes both games.",
+      "properties": {
+        "margin": {
+          "minimum": 0,
+          "title": "Margin",
+          "type": "number"
+        },
+        "metric": {
+          "const": "known_defect_recall",
+          "title": "Metric",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric",
+        "margin"
+      ],
+      "title": "Guardrail",
+      "type": "object"
+    },
     "Stopping": {
       "additionalProperties": false,
       "properties": {
@@ -247,6 +269,13 @@
         "invalid_output": "graded",
         "safety_refusal": "report_separately_not_a_miss"
       }
+    },
+    "guardrails": {
+      "items": {
+        "$ref": "#/$defs/Guardrail"
+      },
+      "title": "Guardrails",
+      "type": "array"
     },
     "margin": {
       "minimum": 0,

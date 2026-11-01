@@ -8,6 +8,18 @@
           "title": "A Confirmed",
           "type": "integer"
         },
+        "a_credited": {
+          "default": 0,
+          "minimum": 0,
+          "title": "A Credited",
+          "type": "integer"
+        },
+        "a_positives": {
+          "default": 0,
+          "minimum": 0,
+          "title": "A Positives",
+          "type": "integer"
+        },
         "a_submitted": {
           "minimum": 0,
           "title": "A Submitted",
@@ -22,6 +34,18 @@
         "b_confirmed": {
           "minimum": 0,
           "title": "B Confirmed",
+          "type": "integer"
+        },
+        "b_credited": {
+          "default": 0,
+          "minimum": 0,
+          "title": "B Credited",
+          "type": "integer"
+        },
+        "b_positives": {
+          "default": 0,
+          "minimum": 0,
+          "title": "B Positives",
           "type": "integer"
         },
         "b_submitted": {
@@ -62,6 +86,64 @@
         "difference"
       ],
       "title": "ClusterRow",
+      "type": "object"
+    },
+    "GuardrailResult": {
+      "additionalProperties": false,
+      "properties": {
+        "ci": {
+          "$ref": "#/$defs/Interval"
+        },
+        "clusters": {
+          "title": "Clusters",
+          "type": "integer"
+        },
+        "margin": {
+          "title": "Margin",
+          "type": "number"
+        },
+        "mean_difference": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mean Difference"
+        },
+        "metric": {
+          "const": "known_defect_recall",
+          "title": "Metric",
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "pass",
+            "fail",
+            "inconclusive"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric",
+        "margin",
+        "outcome",
+        "reason",
+        "clusters",
+        "mean_difference",
+        "ci"
+      ],
+      "title": "GuardrailResult",
       "type": "object"
     },
     "Interval": {
@@ -120,6 +202,13 @@
       "default": "0.1",
       "title": "Decision Version",
       "type": "string"
+    },
+    "guardrails": {
+      "items": {
+        "$ref": "#/$defs/GuardrailResult"
+      },
+      "title": "Guardrails",
+      "type": "array"
     },
     "mean_difference": {
       "anyOf": [
