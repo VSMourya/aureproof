@@ -22,7 +22,19 @@ public API and the specs may change between minor versions).
   on Kimi-K3 (A) and gpt-oss-120b (B) on the six public pairs, with their THRs. It is
   development data, not the pre-registered assessment.
 
+### Changed
+- The exact sign-flip runs in integers: the cluster differences are scaled by their
+  least common denominator, every subset sum is built once, and the subset means are
+  ordered by exact integer keys. Results are identical to the Fraction enumeration
+  (a property test keeps the old implementation as its oracle); 20 clusters take
+  about 0.4 s instead of about 27 s.
+
 ### Fixed
+- A Decision Protocol whose cohort names more than 20 clusters was accepted and
+  signed, and the gate then crashed with a `ValueError` when it ran after the
+  assessment. Such a protocol is now invalid when it is written (conformance vector
+  `too-many-clusters`), and `decide` reports more than 20 rows as inconclusive
+  instead of raising. Protocols with too few clusters to decide stay valid.
 - The SBOM was kept only as a workflow-run artifact, which expires, not attached to
   the GitHub release as the 0.1.0a1 notes said. `release.yml` has a new `attach` job:
   after PyPI accepts the files it signs the wheel, the sdist and the SBOM with the

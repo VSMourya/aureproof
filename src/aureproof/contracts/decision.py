@@ -16,6 +16,9 @@ from aureproof.contracts._base import Contract, NonEmptyStr, PositiveInt
 from aureproof.contracts.specs import Budget, DigestRef, content_identity
 
 DECISION_VERSION = "0.1"
+# The exact gate enumerates all 2^k sign assignments of k cluster differences
+# (specs/decision §4), so a cohort may name at most this many clusters.
+MAX_CLUSTERS = 20
 
 
 class Estimand(Contract):
@@ -86,6 +89,17 @@ class DecisionProtocol(Contract):
         ids = [t.task_identity for t in self.cohort]
         if len(ids) != len(set(ids)):
             raise ValueError("cohort tasks must be unique")
+        return self
+
+    @model_validator(mode="after")
+    def _evaluable(self) -> Self:
+        """Refused when written, not discovered when the gate runs after the assessment."""
+        clusters = len({t.cluster_id for t in self.cohort})
+        if clusters > MAX_CLUSTERS:
+            raise ValueError(
+                f"the exact gate decides at most {MAX_CLUSTERS} clusters; "
+                f"this cohort names {clusters}"
+            )
         return self
 
     @property

@@ -26,7 +26,7 @@ seeing the data.
 | Field | Content |
 | --- | --- |
 | `estimand` | Metric **strict confirmed yield** (ADR-0006); contrast B − A; summary = mean of cluster-level differences; `undefined_yield`: `zero` (default) or `exclude_cluster` |
-| `cohort[]` | `{task_identity, thr_digest, cluster_id}`: the frozen healthy cohort, the frozen Task Health Records it relies on, and the cluster map |
+| `cohort[]` | `{task_identity, thr_digest, cluster_id}`: the frozen healthy cohort, the frozen Task Health Records it relies on, and the cluster map. A protocol whose cohort names more than **20** distinct `cluster_id`s is invalid (§4) |
 | `configurations` | `A` and `B` as `SystemSpec` identities; they MUST differ |
 | `repetitions`, `budget` | Fixed repetitions per episode; per-episode budget (ADR-0007) |
 | `failure_policy` | Fixed in v0.1: infra failure → re-run as a new attempt, then report; missing evidence blocks sealing; refusals reported separately, never misses; budget, agent-error and invalid-output episodes graded |
@@ -47,13 +47,19 @@ every row.
 ## 4. Test and interval
 
 - **Exact paired sign-flip.** Under the null, each cluster difference is equally likely
-  to have either sign. All 2ᵏ assignments are enumerated (k ≤ 20).
+  to have either sign. All 2ᵏ assignments are enumerated, so k ≤ 20. The limit is a
+  protocol validity rule (§2): a cohort with more clusters is refused when the protocol
+  is written, not when the gate runs after the assessment. Fewer than the clusters a
+  decisive outcome needs (below) remains valid, for descriptive runs. A Decision asked
+  to compare more than 20 clusters anyway is inconclusive, never a pass.
 - **Two-sided p-value** (at δ₀ = 0): the share of assignments with |Σ sᵢdᵢ| ≥ |Σdᵢ|.
 - **Interval by test inversion.** For a hypothesized effect δ₀, flipping a set S of
   signs gives a sum at least as large as the observed one exactly when the mean of d over
   S is ≤ δ₀. So the one-sided p-value is (1 + #{non-empty S: mean_S(d) ≤ δ₀}) / 2ᵏ.
   With r = ⌊α·2ᵏ⌋, the bounds are the **r-th smallest** and **r-th largest** of the
-  2ᵏ − 1 subset means.
+  2ᵏ − 1 subset means. (The reference implementation scales the differences to
+  integers by their least common denominator and orders the means by exact integer
+  keys; that is an implementation choice, not part of the definition.)
 - **If r = 0**, no finite bound exists. At α = 0.025 that holds exactly when **k < 6**,
   and the Decision reports that k clusters cannot reach a decisive outcome.
 - **Wilson score intervals** for each configuration's pooled yield are reported
