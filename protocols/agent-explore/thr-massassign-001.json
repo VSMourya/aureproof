@@ -1,0 +1,167 @@
+{
+  "thr_version": "0.1",
+  "task": {
+    "task_id": "massassign-001",
+    "task_revision": "0.1.0",
+    "task_identity": "sha256:4e0d392747c4b45faf321104cb56eef66b1db64868257ee13991c2ff772ee902"
+  },
+  "environment": {
+    "runner": "aureproof-calibration",
+    "runner_version": "0.1.0a1",
+    "image_digest": "sha256:5210083672552075fcf6b3b7d894b12f734723946a2f69f7a4a4419662089784",
+    "platform": "darwin/arm64"
+  },
+  "scoring_identity": "sha256:512fa1e98bb368ad6f60639518041beed77f982664827b242d3f49114c1616f0",
+  "controls": [
+    {
+      "kind": "label_lint",
+      "variant": null,
+      "input_digest": "sha256:9c88009f892f0d8397581e4487042dab96f75c5555a4170460bef8ea534ba505",
+      "expected": [],
+      "observed": [],
+      "passed": true,
+      "run_ids": [
+        "calibration-1"
+      ],
+      "note": null
+    },
+    {
+      "kind": "reference_positive",
+      "variant": "vulnerable",
+      "input_digest": "sha256:a4fe87e435872f78f6e1331c5ba0756407a0731197af221d290f89f69c96be92",
+      "expected": {
+        "credited": [
+          "massassign-001-d1"
+        ]
+      },
+      "observed": {
+        "credited": [
+          "massassign-001-d1"
+        ]
+      },
+      "passed": true,
+      "run_ids": [
+        "calibration-1"
+      ],
+      "note": null
+    },
+    {
+      "kind": "repaired_negative",
+      "variant": "repaired",
+      "input_digest": "sha256:7825416e209f8589da84523b4e0f084c7db32700fdb462c8368dede5ad3686c1",
+      "expected": [
+        "refuted",
+        "refuted"
+      ],
+      "observed": [
+        "refuted",
+        "refuted"
+      ],
+      "passed": true,
+      "run_ids": [
+        "calibration-1"
+      ],
+      "note": null
+    },
+    {
+      "kind": "nop",
+      "variant": "vulnerable",
+      "input_digest": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "expected": {
+        "recall": "0/1"
+      },
+      "observed": {
+        "recall": "0/1"
+      },
+      "passed": true,
+      "run_ids": [
+        "calibration-1"
+      ],
+      "note": null
+    },
+    {
+      "kind": "spray_cheat",
+      "variant": "vulnerable",
+      "input_digest": "sha256:4d09efb80df8f6431a004cd9d514c2d5038e74394862731cfa59a847fd11c882",
+      "expected": {
+        "recall": "1/1",
+        "strict_yield_at_most": 0.25
+      },
+      "observed": {
+        "recall": "1/1",
+        "strict_yield": "1/42"
+      },
+      "passed": true,
+      "run_ids": [
+        "calibration-1"
+      ],
+      "note": null
+    },
+    {
+      "kind": "malformed",
+      "variant": "vulnerable",
+      "input_digest": "sha256:8b351adb56355ffc40a4986ab30267eecae89710c63d09cba764a35adfda3ef5",
+      "expected": "invalid_output",
+      "observed": "invalid_output",
+      "passed": true,
+      "run_ids": [
+        "calibration-1"
+      ],
+      "note": null
+    },
+    {
+      "kind": "calibration_poc",
+      "variant": null,
+      "input_digest": "sha256:2420e0a7de3cb97f45ac60089347ac49f37e603875684b9d3121c22516dcca0f",
+      "expected": {
+        "vulnerable": {
+          "reference_positive": true,
+          "irrelevant_trigger": false,
+          "malformed": false
+        },
+        "repaired": {
+          "reference_positive": false,
+          "irrelevant_trigger": false,
+          "malformed": false
+        }
+      },
+      "observed": {
+        "vulnerable": {
+          "reference_positive": true,
+          "irrelevant_trigger": false,
+          "malformed": false
+        },
+        "repaired": {
+          "reference_positive": false,
+          "irrelevant_trigger": false,
+          "malformed": false
+        }
+      },
+      "passed": true,
+      "run_ids": [
+        "calibration-1"
+      ],
+      "note": null
+    }
+  ],
+  "determinism": {
+    "rerun_ids": [
+      "calibration-2"
+    ],
+    "reproduced": true
+  },
+  "difficulty_probe": null,
+  "status": "healthy",
+  "status_reason": "all required controls pass and reproduce",
+  "known_limits": [
+    "Synthetic fixture: controlled skills, not real-world capability.",
+    "Calibrated on darwin/arm64, a development host; recalibrate on the qualified Linux host (docs/guides/linux-host.md) before freezing."
+  ],
+  "reviewed_by": [],
+  "frozen_at": null,
+  "canary_id": "bc7be4bb-329f-4b66-b449-21b81c3c246e",
+  "provenance": {
+    "authorship": "self-authored",
+    "license": "CC-BY-4.0"
+  }
+}
