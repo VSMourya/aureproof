@@ -11,6 +11,17 @@ public API and the specs may change between minor versions).
 
 ## [Unreleased]
 
+### Added
+- The reference subject runs on OpenAI-compatible endpoints as
+  `openai-api/<service>/<model>`, through Inspect's provider (the `inspect` extra now
+  pins `openai==3.30.0`). Preflight refuses a missing `<SERVICE>_BASE_URL`, a missing
+  `<SERVICE>_API_KEY` or a non-https endpoint before any dispatch, and the endpoint is
+  recorded in the system identity (`provider_identity.endpoint`). Anthropic systems
+  keep their identities.
+- `protocols/agent-explore/`: an exploratory protocol comparing the reference subject
+  on Kimi-K3 (A) and gpt-oss-120b (B) on the six public pairs, with their THRs. It is
+  development data, not the pre-registered assessment.
+
 ### Fixed
 - The SBOM was kept only as a workflow-run artifact, which expires, not attached to
   the GitHub release as the 0.1.0a1 notes said. `release.yml` has a new `attach` job:

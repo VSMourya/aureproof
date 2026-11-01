@@ -31,6 +31,7 @@ import base64
 import hashlib
 import importlib.metadata as md
 import json
+import os
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -137,7 +138,12 @@ def preflight(cfg: InspectRunnerConfig) -> list[str]:
     if cfg.subject == "reference":
         if cfg.hosted_tools != "closed-world":
             raise UnsupportedCapability("the reference subject offers no hosted tools")
-        return []
+        if provider != OPENAI_API:
+            return []
+        return [
+            f"model requests go to the OpenAI-compatible endpoint {openai_api_endpoint(cfg)}"
+            " through Inspect's openai-api provider (Chat Completions)"
+        ]
     if cfg.hosted_tools != "closed-world":
         raise UnsupportedCapability(
             "web-search is not implemented: the bridge's web_search is never enabled, and"
@@ -194,6 +200,33 @@ def _binary_cache(cfg: InspectRunnerConfig) -> Path | None:
     return Path(package_cache_dir("claude-code-downloads"))
 
 
+OPENAI_API = "openai-api"
+
+
+def openai_api_endpoint(cfg: InspectRunnerConfig) -> str:
+    """The base URL of `openai-api/<service>/<model>`, as Inspect reads it.
+
+    Inspect takes the endpoint from `<SERVICE>_BASE_URL` and the key from
+    `<SERVICE>_API_KEY`. Both are checked here, before any dispatch; the key never
+    enters the sandbox, since the reference subject's model calls are the controller's.
+    """
+    _, _, rest = cfg.model_name.partition("/")
+    service, _, model = rest.partition("/")
+    if not service or not model:
+        raise UnsupportedCapability(
+            f"expected openai-api/<service>/<model>, not {cfg.model_name!r}"
+        )
+    prefix = service.upper().replace("-", "_")
+    base_url = os.environ.get(f"{prefix}_BASE_URL", "").rstrip("/")
+    if not base_url:
+        raise UnsupportedCapability(f"{cfg.model_name!r} needs {prefix}_BASE_URL")
+    if not base_url.startswith("https://"):
+        raise UnsupportedCapability(f"{prefix}_BASE_URL must be an https URL, not {base_url!r}")
+    if not os.environ.get(f"{prefix}_API_KEY"):
+        raise UnsupportedCapability(f"{cfg.model_name!r} needs {prefix}_API_KEY")
+    return base_url
+
+
 def _protocol(cfg: InspectRunnerConfig) -> str:
     return "anthropic-messages" if cfg.subject == "claude_code" else "inspect"
 
@@ -243,7 +276,7 @@ def system_spec(cfg: InspectRunnerConfig) -> SystemSpec:
                     "provider_identity": {
                         "model_snapshot": None,
                         "api_version": None,
-                        "endpoint": None,
+                        "endpoint": openai_api_endpoint(cfg) if provider == OPENAI_API else None,
                         "region": None,
                     },
                 }

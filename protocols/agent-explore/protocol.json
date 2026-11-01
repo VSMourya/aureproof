@@ -1,0 +1,73 @@
+{
+  "protocol_version": "0.1",
+  "name": "agent-explore-akash-1",
+  "estimand": {
+    "metric": "strict_confirmed_yield",
+    "contrast": "B-A",
+    "summary": "mean_of_cluster_differences",
+    "undefined_yield": "zero"
+  },
+  "cohort": [
+    {
+      "task_identity": "sha256:5485f08b1e88e1814c19376c867d33996c394847dd9adc58f959a4f78927cff8",
+      "thr_digest": "sha256:3a128ab7a3eb83bac9f5029a6f939147469b82e250abacb4e04d308a55f5741f",
+      "cluster_id": "authz-001"
+    },
+    {
+      "task_identity": "sha256:3d581887603afe8ce7eb56f6082b1d4616d1241e04cdf6547316d2df21bfd5f0",
+      "thr_digest": "sha256:b8e0f8b97cc1759c1e028cdffc03077773c052ad88e7150a5b74ce475fb6bff0",
+      "cluster_id": "path-001"
+    },
+    {
+      "task_identity": "sha256:fc64c422efc23705bf97baa6d2c6f90bdee7da38948f5ffbd10afe4f2f1158a8",
+      "thr_digest": "sha256:da51c172a1bbe8bf9c0f08d4faf0ce6108d5a7a591f8c5beab15b00ebb0a488a",
+      "cluster_id": "authz-002"
+    },
+    {
+      "task_identity": "sha256:1cd96806e1d4d7e95aa1898819a844355c28238e5b1aac15e76e59858064796b",
+      "thr_digest": "sha256:9c53ec7db3fa7ffddbb1b2d90d6947a59f2131ca18b1b5abc1c2ee687979313c",
+      "cluster_id": "ssrf-001"
+    },
+    {
+      "task_identity": "sha256:6f4686140720cac1f2e48d94332e8c5e44fa5d5abef1ec70e12048b054bc1e48",
+      "thr_digest": "sha256:a64eb780080d45657f910749b7c1a2e3c0cb53c575f0170892813568e1afb053",
+      "cluster_id": "redirect-001"
+    },
+    {
+      "task_identity": "sha256:4e0d392747c4b45faf321104cb56eef66b1db64868257ee13991c2ff772ee902",
+      "thr_digest": "sha256:79c023157d9cf856fc283ab31bafc570fbe16da4ffb1178fe04581b2a6420503",
+      "cluster_id": "massassign-001"
+    }
+  ],
+  "configurations": {
+    "A": "sha256:b99a757821ae1055051388182913f4503300edfa8aef779e26a5c7edb43d425a",
+    "B": "sha256:850191e1b77ab6ad6431d5c03de733e2a0b9a951e98dc394d6e7aed073f4f87f"
+  },
+  "repetitions": 3,
+  "budget": {
+    "max_tokens": 400000,
+    "max_seconds": 900,
+    "max_attempts": 1
+  },
+  "failure_policy": {
+    "infra_failure": "rerun_new_attempt_then_report",
+    "evidence_incomplete": "blocks_sealing",
+    "safety_refusal": "report_separately_not_a_miss",
+    "budget_exhausted": "graded",
+    "agent_error": "graded",
+    "invalid_output": "graded"
+  },
+  "test": {
+    "method": "exact_sign_flip",
+    "ci": "test_inversion",
+    "alpha": 0.025
+  },
+  "margin": 0.05,
+  "stopping": {
+    "fixed_repetitions": true,
+    "peeking": false,
+    "exploratory_analyses": []
+  },
+  "require_complete_adjudication": true,
+  "pilot_mde": null
+}

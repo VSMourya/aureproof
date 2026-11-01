@@ -1,0 +1,167 @@
+{
+  "thr_version": "0.1",
+  "task": {
+    "task_id": "authz-002",
+    "task_revision": "0.1.1",
+    "task_identity": "sha256:fc64c422efc23705bf97baa6d2c6f90bdee7da38948f5ffbd10afe4f2f1158a8"
+  },
+  "environment": {
+    "runner": "aureproof-calibration",
+    "runner_version": "0.1.0a1",
+    "image_digest": "sha256:5210083672552075fcf6b3b7d894b12f734723946a2f69f7a4a4419662089784",
+    "platform": "darwin/arm64"
+  },
+  "scoring_identity": "sha256:512fa1e98bb368ad6f60639518041beed77f982664827b242d3f49114c1616f0",
+  "controls": [
+    {
+      "kind": "label_lint",
+      "variant": null,
+      "input_digest": "sha256:12041a3606fb0ad5304ad12f33ba6917ddd31ea995857eadd6bf0fdc068d8683",
+      "expected": [],
+      "observed": [],
+      "passed": true,
+      "run_ids": [
+        "calibration-1"
+      ],
+      "note": null
+    },
+    {
+      "kind": "reference_positive",
+      "variant": "vulnerable",
+      "input_digest": "sha256:ea8f3ab44887a6b17a5e7a69876a916cd0e901e5253ec872f677be92aee77f6b",
+      "expected": {
+        "credited": [
+          "authz-002-d1"
+        ]
+      },
+      "observed": {
+        "credited": [
+          "authz-002-d1"
+        ]
+      },
+      "passed": true,
+      "run_ids": [
+        "calibration-1"
+      ],
+      "note": null
+    },
+    {
+      "kind": "repaired_negative",
+      "variant": "repaired",
+      "input_digest": "sha256:1b63f2e0588ce4c484461a090d58c091368904baa27f619ad535afe8c7d79032",
+      "expected": [
+        "refuted",
+        "refuted"
+      ],
+      "observed": [
+        "refuted",
+        "refuted"
+      ],
+      "passed": true,
+      "run_ids": [
+        "calibration-1"
+      ],
+      "note": null
+    },
+    {
+      "kind": "nop",
+      "variant": "vulnerable",
+      "input_digest": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "expected": {
+        "recall": "0/1"
+      },
+      "observed": {
+        "recall": "0/1"
+      },
+      "passed": true,
+      "run_ids": [
+        "calibration-1"
+      ],
+      "note": null
+    },
+    {
+      "kind": "spray_cheat",
+      "variant": "vulnerable",
+      "input_digest": "sha256:5322e26e80dcd4e28c0f02fe118de960bb91a8e9c13722f00dfe88ddd7818a57",
+      "expected": {
+        "recall": "1/1",
+        "strict_yield_at_most": 0.25
+      },
+      "observed": {
+        "recall": "1/1",
+        "strict_yield": "1/102"
+      },
+      "passed": true,
+      "run_ids": [
+        "calibration-1"
+      ],
+      "note": null
+    },
+    {
+      "kind": "malformed",
+      "variant": "vulnerable",
+      "input_digest": "sha256:8b351adb56355ffc40a4986ab30267eecae89710c63d09cba764a35adfda3ef5",
+      "expected": "invalid_output",
+      "observed": "invalid_output",
+      "passed": true,
+      "run_ids": [
+        "calibration-1"
+      ],
+      "note": null
+    },
+    {
+      "kind": "calibration_poc",
+      "variant": null,
+      "input_digest": "sha256:2aeded8d0307059243c9ec4b0b49b91472b04adcc364f00a70efc2c8cd2ea25f",
+      "expected": {
+        "vulnerable": {
+          "reference_positive": true,
+          "irrelevant_trigger": false,
+          "malformed": false
+        },
+        "repaired": {
+          "reference_positive": false,
+          "irrelevant_trigger": false,
+          "malformed": false
+        }
+      },
+      "observed": {
+        "vulnerable": {
+          "reference_positive": true,
+          "irrelevant_trigger": false,
+          "malformed": false
+        },
+        "repaired": {
+          "reference_positive": false,
+          "irrelevant_trigger": false,
+          "malformed": false
+        }
+      },
+      "passed": true,
+      "run_ids": [
+        "calibration-1"
+      ],
+      "note": null
+    }
+  ],
+  "determinism": {
+    "rerun_ids": [
+      "calibration-2"
+    ],
+    "reproduced": true
+  },
+  "difficulty_probe": null,
+  "status": "healthy",
+  "status_reason": "all required controls pass and reproduce",
+  "known_limits": [
+    "Synthetic fixture: controlled skills, not real-world capability.",
+    "Calibrated on darwin/arm64, a development host; recalibrate on the qualified Linux host (docs/guides/linux-host.md) before freezing."
+  ],
+  "reviewed_by": [],
+  "frozen_at": null,
+  "canary_id": "c5a2dc45-5c39-4e94-a69b-f6efc32f6f25",
+  "provenance": {
+    "authorship": "self-authored",
+    "license": "CC-BY-4.0"
+  }
+}
