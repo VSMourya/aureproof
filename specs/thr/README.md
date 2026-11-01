@@ -35,9 +35,10 @@ on one runner backend and fail on another (Harbor #136).
 | `reviewed_by[]`, `frozen_at` | Reviewers `{name, role: author \| independent_reviewer}`; freeze time (UTC) |
 | `canary_id`, `provenance` | Contamination canary; `{authorship, license}` |
 
-A record vouches only for the grader its controls ran under. A comparison gate MUST
-refuse a run whose seal's `scoring_profile`, or any re-scored episode's scoring
-identity, differs from the `scoring_identity` of a cohort task's record.
+A record vouches only for the grader its controls ran under, in the status it derives.
+A comparison gate MUST re-check every record a protocol pins, offline, and MUST refuse a
+run when such a record is not `healthy`, or when the seal's `scoring_profile` or any
+re-scored episode's scoring identity differs from the record's `scoring_identity`.
 
 ## 3. Required controls and the health derivation
 

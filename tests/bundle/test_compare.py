@@ -15,6 +15,7 @@ import pytest
 
 from aureproof.bundle.compare import GateError, compare
 from aureproof.contracts.decision import DecisionProtocol
+from aureproof.contracts.thr import TaskHealthRecord
 from aureproof.scoring import scoring_identity
 from aureproof.storage import read_bundle
 
@@ -139,6 +140,30 @@ def test_a_thr_proven_under_other_scoring_semantics_fails_closed() -> None:
         f"but the run was scored under {graded}"
         for side in ("A", "B")
     ]
+
+
+@pytest.mark.parametrize(
+    ("vector", "status"),
+    [("unhealthy-spray-rewarded", "unhealthy"), ("unknown-missing-nop", "unknown")],
+)
+def test_a_protocol_pinning_a_thr_that_is_not_healthy_fails_closed(
+    vector: str, status: str
+) -> None:
+    # The gate re-checks health offline instead of trusting the producer's runner. The
+    # protocol names the record's digest and its scoring identity is the run's, so only
+    # the health check can fire.
+    gate = _generator()
+    thrs = {t: gate._thr(t) for t in gate.TASKS}
+    data = gate._instance(f"conformance/thr/v0.1/valid/{vector}.json")
+    data["task"] = thrs["s1"].task.model_dump(mode="json")
+    data["scoring_identity"] = thrs["s1"].scoring_identity
+    thrs["s1"] = TaskHealthRecord.model_validate(data)
+    assert thrs["s1"].status.value == status
+    protocol = gate._protocol("pass", thrs)
+    a, b = (gate._bundle(side, protocol, thrs, gate.SCENARIOS["pass"]) for side in ("A", "B"))
+    with pytest.raises(GateError) as err:
+        compare(protocol, a, b)
+    assert err.value.problems == [f"{side}: s1: the THR is {status}, not healthy" for side in "AB"]
 
 
 def test_a_seal_without_a_readable_scoring_profile_fails_closed() -> None:

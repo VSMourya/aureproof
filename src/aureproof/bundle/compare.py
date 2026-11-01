@@ -5,11 +5,11 @@
 Pure: files in, a decision out. Each bundle must belong to the protocol, or the
 comparison fails closed with every problem listed: the sealed protocol is the
 same document, the sealed system is configuration A (or B), every cohort task
-has the THR the protocol names by digest, that THR's controls ran under the
-scoring identity that graded the run (the seal's ``scoring_profile``, which every
-re-scored episode must carry), every task and variant has exactly the protocol's
-repetitions and nothing else, every planned episode names this protocol and
-system, and the bundle re-scores byte for byte. Only then are the
+has the THR the protocol names by digest, that THR is healthy and its controls
+ran under the scoring identity that graded the run (the seal's ``scoring_profile``,
+which every re-scored episode must carry), every task and variant has exactly
+the protocol's repetitions and nothing else, every planned episode names this
+protocol and system, and the bundle re-scores byte for byte. Only then are the
 re-scored episodes grouped by cluster, one ``ClusterRow`` each, and passed to
 the exact three-way gate (``stats.decide``). Quality (strict confirmed yield)
 and operational completion are reported separately.
@@ -38,7 +38,7 @@ from aureproof.contracts import SystemSpec
 from aureproof.contracts.adjudication import Adjudication
 from aureproof.contracts.decision import ClusterRow, Decision, DecisionProtocol
 from aureproof.contracts.strict_json import JsonInputError, loads_strict
-from aureproof.contracts.thr import TaskHealthRecord, thr_digest
+from aureproof.contracts.thr import HealthStatus, TaskHealthRecord, thr_digest
 from aureproof.scoring import compute_metrics
 from aureproof.scoring.adjudication import adjusted, check, queue, resolve
 from aureproof.scoring.episode import EpisodeScore
@@ -131,6 +131,11 @@ def _check(
                 f"{side}: {found.task.task_id}: THR is not at {thr_path(found.task.task_id)}"
             )
         else:
+            # Re-checked offline: the gate does not trust the producer's runner (slice.plan).
+            if found.status is not HealthStatus.HEALTHY:
+                problems.append(
+                    f"{side}: {found.task.task_id}: the THR is {found.status.value}, not healthy"
+                )
             # The THR vouches for the grader its controls ran under, not for any grader.
             if profile is not None and found.scoring_identity != profile:
                 problems.append(
