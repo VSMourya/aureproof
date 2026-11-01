@@ -51,7 +51,13 @@ def test_vectors_cover_pass_fail_inconclusive_tie_zero_and_adjudication() -> Non
     outcomes = {c["expected"]["outcome"] for c in VECTORS["cases"]}
     assert outcomes == {"pass", "fail", "inconclusive"}
     titles = " ".join(c["title"] for c in VECTORS["cases"]).lower()
-    for word in ("zero difference", "exactly at -margin", "five clusters", "unadjudicated"):
+    for word in (
+        "zero difference",
+        "exactly at -margin",
+        "five clusters",
+        "unadjudicated",
+        "vacuous",
+    ):
         assert word in titles
 
 
@@ -166,3 +172,85 @@ def test_the_margin_is_the_decimal_the_protocol_wrote() -> None:
     assert decision.mean_difference == "-1/20"
     assert decision.outcome == "inconclusive", decision.reason
     assert "-1/20" in decision.reason and "72057594037927936" not in decision.reason
+
+
+def _protocol(k: int, margin: float) -> DecisionProtocol:
+    return DecisionProtocol.model_validate(
+        {
+            "protocol_version": "0.1",
+            "name": "vacuity",
+            "cohort": [
+                {
+                    "task_identity": "sha256:" + format(i, "064x"),
+                    "thr_digest": "sha256:" + "a" * 64,
+                    "cluster_id": f"c{i}",
+                }
+                for i in range(k)
+            ],
+            "configurations": {"A": "sha256:" + "1" * 64, "B": "sha256:" + "2" * 64},
+            "repetitions": 1,
+            "margin": margin,
+        }
+    )
+
+
+def _counts(most_confirmed: int) -> st.SearchStrategy[tuple[int, int]]:
+    """(confirmed, submitted) with confirmed <= submitted <= 6."""
+    return st.tuples(st.integers(0, most_confirmed), st.integers(0, 6)).map(
+        lambda t: (min(t), max(t))
+    )
+
+
+@settings(max_examples=200, deadline=None)
+@given(
+    # A weak baseline (at most one confirmed finding per cluster) makes certain passes common.
+    st.lists(st.tuples(_counts(1), _counts(6)), min_size=6, max_size=8),
+    st.sampled_from([0.0, 0.05, 0.25]),
+)
+def test_a_pass_is_never_certain_before_b_is_seen(
+    clusters: list[tuple[tuple[int, int], tuple[int, int]]], margin: float
+) -> None:
+    """A pass stands only if B with yield 0 in every cluster would not also have passed.
+
+    Every subset mean, and so the interval's lower bound, rises with each cluster
+    difference, so B = 0 everywhere is the worst case for B on the same clusters.
+    """
+    protocol = _protocol(len(clusters), margin)
+    rows = [
+        ClusterRow(
+            cluster_id=f"c{i}",
+            a_confirmed=ac,
+            a_submitted=an,
+            b_confirmed=bc,
+            b_submitted=bn,
+            difference=None,
+        )
+        for i, ((ac, an), (bc, bn)) in enumerate(clusters)
+    ]
+    worst = [r.model_copy(update={"b_confirmed": 0}) for r in rows]
+    decision, worst_case = decide(protocol, rows), decide(protocol, worst)
+    certain = worst_case.provisional_outcome == "pass"
+    if decision.provisional_outcome == "pass":
+        assert decision.outcome == ("inconclusive" if certain else "pass"), decision.reason
+    if certain:
+        assert decision.outcome != "pass"
+        assert decision.provisional_outcome == "pass"
+        assert "could have failed" in decision.reason
+
+
+def test_a_silent_cohort_never_passes_the_gate() -> None:
+    """Both configurations submitting nothing anywhere, as a broken runner would."""
+    rows = [
+        ClusterRow(
+            cluster_id=f"c{i}",
+            a_confirmed=0,
+            a_submitted=0,
+            b_confirmed=0,
+            b_submitted=0,
+            difference=None,
+        )
+        for i in range(12)
+    ]
+    decision = decide(_protocol(12, 0.05), rows)
+    assert decision.outcome == "inconclusive"
+    assert decision.provisional_outcome == "pass"
