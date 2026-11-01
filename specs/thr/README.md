@@ -82,7 +82,9 @@ asserted by hand.
 
 `aureproof.scoring.health.partition_by_health(episodes, records, protocol_frozen_at)`:
 
-- **Only records frozen before the protocol freeze decide exclusion.** A task whose
+- **Only records frozen before the protocol freeze decide exclusion** (at or before it,
+  compared as instants, not as strings: a record frozen at `…00:00:00.5Z` is after a
+  freeze at `…00:00:00Z`; a malformed freeze time is refused). A task whose
   pre-registered record is `unhealthy` or `unknown` is **excluded**: its episodes leave
   the cohort before metrics, and it is reported as a dataset-health finding.
   **An unhealthy task never becomes an agent false positive.**

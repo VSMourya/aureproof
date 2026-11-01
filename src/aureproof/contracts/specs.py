@@ -10,6 +10,8 @@ dispatch, so they cannot drift afterwards.
 
 from __future__ import annotations
 
+import re
+from datetime import UTC, datetime, timedelta
 from typing import Annotated, Literal, Self
 
 from pydantic import AfterValidator, Field, JsonValue, model_validator
@@ -27,7 +29,30 @@ from aureproof.contracts.canonical import digest_ref
 DigestRef = Annotated[str, Field(pattern=r"^sha256:[0-9a-f]{64}$")]
 UtcTimestamp = Annotated[
     str, Field(pattern=r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,9})?Z$")
-]  # RFC 3339 UTC; fixed format, so string order is time order
+]  # RFC 3339 UTC. The fraction is optional and of any length, so string order is NOT
+# time order ("...00.5Z" sorts before "...00Z"): order and compare with ``utc_instant``.
+_UTC_PARTS = re.compile(r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d{1,9}))?Z")
+_EPOCH = datetime(1970, 1, 1, tzinfo=UTC)
+_ONE_SECOND = timedelta(seconds=1)
+
+
+def utc_instant(timestamp: str) -> int:
+    """Nanoseconds since the Unix epoch of a ``UtcTimestamp``, for ordering.
+
+    Equal instants written with different precision ("...00.5Z", "...00.500Z")
+    are equal; anything that is not a real RFC 3339 UTC instant is refused.
+    """
+    parsed = _UTC_PARTS.fullmatch(timestamp)
+    try:
+        if parsed is None:
+            raise ValueError
+        moment = datetime.strptime(parsed[1], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=UTC)
+    except ValueError:
+        raise ValueError(f"not an RFC 3339 UTC timestamp: {timestamp!r}") from None
+    whole_seconds = (moment - _EPOCH) // _ONE_SECOND
+    return whole_seconds * 1_000_000_000 + int((parsed[2] or "").ljust(9, "0"))
+
+
 _REL_PATH = r"^(?!/)(?!.*\\)(?!(.*/)?\.{1,2}(/|$)).+$"
 
 
@@ -248,6 +273,10 @@ class AttemptRecord(Contract):
             raise ValueError("a planned attempt has not been dispatched")
         if self.status == "failed" and self.error_class is None:
             raise ValueError("a failed attempt records its error_class")
-        if self.started_at and self.ended_at and self.ended_at < self.started_at:
+        if (
+            self.started_at
+            and self.ended_at
+            and utc_instant(self.ended_at) < utc_instant(self.started_at)
+        ):
             raise ValueError("ended_at precedes started_at")
         return self
