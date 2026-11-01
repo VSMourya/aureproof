@@ -23,6 +23,12 @@ public API and the specs may change between minor versions).
   development data, not the pre-registered assessment.
 
 ### Fixed
+- `aureproof compare` never checked that a cohort task's THR vouched for the grader that
+  scored the run: the THR's `scoring_identity` was recorded and never read. The gate now
+  fails closed when a THR's scoring identity differs from the seal's `scoring_profile`,
+  when the seal names no readable profile, or when a re-scored episode carries another
+  identity than the seal names. Every existing example and bundle carries the same
+  identity, so no result changes.
 - The SBOM was kept only as a workflow-run artifact, which expires, not attached to
   the GitHub release as the 0.1.0a1 notes said. `release.yml` has a new `attach` job:
   after PyPI accepts the files it signs the wheel, the sdist and the SBOM with the

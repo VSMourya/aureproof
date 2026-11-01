@@ -30,7 +30,9 @@ match the protocol:
 
 - the sealed protocol is the same document;
 - the sealed system is configuration A (or B);
-- every cohort task has the THR that the protocol names by digest;
+- every cohort task has the THR that the protocol names by digest, and its controls ran
+  under the scoring identity that graded the run (the seal's `scoring_profile`, carried by
+  every re-scored episode);
 - every task and variant has exactly the protocol's repetitions, and nothing else;
 - every planned episode names this protocol and system;
 - the bundle re-scores byte for byte.
