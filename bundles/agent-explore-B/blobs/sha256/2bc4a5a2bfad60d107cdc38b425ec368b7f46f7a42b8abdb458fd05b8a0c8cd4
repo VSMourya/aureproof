@@ -1,0 +1,15 @@
+[
+  {
+    "cwe": 284,
+    "locations": [
+      {
+        "file": "docstore/service.py",
+        "symbol": "delete_document",
+        "start_line": 46,
+        "end_line": 49,
+        "role": "site"
+      }
+    ],
+    "description": "delete_document does not check the caller's permissions before deleting a document, allowing any authenticated user to delete any document regardless of ownership or sharing. This violates access control (CWE-284) and can be abused to cause denial‑of‑service or data loss."
+  }
+]

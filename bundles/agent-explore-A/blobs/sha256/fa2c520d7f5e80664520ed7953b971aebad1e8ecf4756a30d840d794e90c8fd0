@@ -1,0 +1,15 @@
+[
+  {
+    "cwe": 863,
+    "locations": [
+      {
+        "file": "profilehub/api.py",
+        "symbol": "handle_request",
+        "start_line": 28,
+        "end_line": 36,
+        "role": "site"
+      }
+    ],
+    "description": "Deactivation is never enforced: handle_request loads the actor and dispatches every action without checking actor.is_active, and no service function reads the flag either, so a deactivated member keeps full API access. A deactivated admin in particular retains all admin powers and can reactivate itself (action 'admin' with changes {'is_active': true}) and keep managing other members, making the deactivate/is_active mechanism useless for revoking access from a hostile or compromised account."
+  }
+]

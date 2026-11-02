@@ -1,0 +1,36 @@
+[
+  {
+    "cwe": 601,
+    "locations": [
+      {
+        "file": "portalauth/urls.py",
+        "symbol": "is_local_path",
+        "start_line": 12,
+        "end_line": 17,
+        "role": "site"
+      },
+      {
+        "file": "portalauth/api.py",
+        "symbol": "handle_request",
+        "start_line": 17,
+        "end_line": 17,
+        "role": "source"
+      },
+      {
+        "file": "portalauth/service.py",
+        "symbol": "finish_logout",
+        "start_line": 30,
+        "end_line": 32,
+        "role": "sink"
+      },
+      {
+        "file": "portalauth/service.py",
+        "symbol": "finish_login",
+        "start_line": 25,
+        "end_line": 27,
+        "role": "sink"
+      }
+    ],
+    "description": "Open redirect: the attacker-controlled 'next' value is validated by is_local_path but the raw string (not the normalized parse) is returned as the 302 Location. Control characters that Python's urlsplit silently strips, e.g. '/\\t//attacker.example', pass all checks (one visible leading slash, no '//' prefix, no backslash, empty parsed netloc), yet browsers also strip tabs/newlines per the WHATWG URL standard and resolve the value as the scheme-relative '//attacker.example'. The unauthenticated logout action (and the post-login redirect) can therefore send any victim to an arbitrary external site; a '\\r\\n' payload passes too, enabling HTTP response splitting if the framework emits the header verbatim."
+  }
+]

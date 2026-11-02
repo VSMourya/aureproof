@@ -1,0 +1,28 @@
+[
+  {
+    "cwe": 601,
+    "locations": [
+      {
+        "file": "linkpreview/service.py",
+        "symbol": "fetch_preview",
+        "start_line": 27,
+        "end_line": 35,
+        "role": "site"
+      }
+    ],
+    "description": "fetch_preview follows HTTP redirects without re‑validating the target URL. An attacker can supply an allowed initial URL that redirects to an arbitrary host, bypassing the ALLOWED_HOSTS whitelist and enabling SSRF."
+  },
+  {
+    "cwe": 20,
+    "locations": [
+      {
+        "file": "linkpreview/service.py",
+        "symbol": "fetch_partner_feed",
+        "start_line": 49,
+        "end_line": 52,
+        "role": "site"
+      }
+    ],
+    "description": "fetch_partner_feed constructs a partner‑specific URL and sends it via the transport without calling check_url. This bypasses the host whitelist, allowing requests to any subdomain of *.feeds.example (or further manipulated URLs) and potentially leading to SSRF."
+  }
+]

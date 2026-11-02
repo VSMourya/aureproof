@@ -1,0 +1,42 @@
+[
+  {
+    "cwe": 248,
+    "locations": [
+      {
+        "file": "invoicer/api.py",
+        "symbol": "handle_request",
+        "start_line": 91,
+        "end_line": 98,
+        "role": "source"
+      },
+      {
+        "file": "invoicer/service.py",
+        "symbol": "shared_view",
+        "start_line": 62,
+        "end_line": 64,
+        "role": "sink"
+      }
+    ],
+    "description": "The unauthenticated 'shared' action forwards the attacker-supplied token into hmac.compare_digest, which raises TypeError for non-ASCII str input. api.py only catches NotFound, so sending a non-ASCII token (once any invoice is shared) crashes the request handler with an uncaught exception, an unauthenticated denial-of-service / error-disclosure vector."
+  },
+  {
+    "cwe": 284,
+    "locations": [
+      {
+        "file": "invoicer/service.py",
+        "symbol": "list_invoices",
+        "start_line": 35,
+        "end_line": 37,
+        "role": "site"
+      },
+      {
+        "file": "invoicer/service.py",
+        "symbol": "get_invoice",
+        "start_line": 40,
+        "end_line": 45,
+        "role": "site"
+      }
+    ],
+    "description": "list_invoices and get_invoice enforce only read-level 'member' authorization yet return the live, mutable Invoice objects held in the store. A member (read-only role) can mutate the returned object (e.g. status='void', amount_cents=0, share_token='') and thereby void or alter invoices, completely bypassing the require_role('admin','accountant') gate in void_invoice and share_invoice."
+  }
+]

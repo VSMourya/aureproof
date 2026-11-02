@@ -1,0 +1,28 @@
+[
+  {
+    "cwe": 862,
+    "locations": [
+      {
+        "file": "docstore/service.py",
+        "symbol": "delete_document",
+        "start_line": 60,
+        "end_line": 63,
+        "role": "site"
+      }
+    ],
+    "description": "delete_document does not perform any authorization checks, allowing any authenticated user to delete any document regardless of ownership or permissions (CWE-862: Missing Authorization)."
+  },
+  {
+    "cwe": 284,
+    "locations": [
+      {
+        "file": "docstore/auth.py",
+        "symbol": "can_read",
+        "start_line": 18,
+        "end_line": 20,
+        "role": "site"
+      }
+    ],
+    "description": "can_read does not consider the Document.public flag, so public documents cannot be read by unauthenticated users, violating intended access control (CWE-284: Improper Access Control)."
+  }
+]

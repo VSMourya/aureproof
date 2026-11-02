@@ -1,0 +1,28 @@
+[
+  {
+    "cwe": 113,
+    "locations": [
+      {
+        "file": "portalauth/urls.py",
+        "symbol": "is_local_path",
+        "start_line": 12,
+        "end_line": 21,
+        "role": "site"
+      }
+    ],
+    "description": "The function is_local_path validates redirect targets but does not reject CR or LF characters. An attacker could supply a 'next' parameter containing '\r\n' to perform HTTP response splitting or header injection, potentially leading to XSS or session hijacking."
+  },
+  {
+    "cwe": 601,
+    "locations": [
+      {
+        "file": "portalauth/urls.py",
+        "symbol": "is_local_path",
+        "start_line": 12,
+        "end_line": 21,
+        "role": "site"
+      }
+    ],
+    "description": "is_local_path only checks that the target starts with a single slash and contains no scheme or backslash, allowing path traversal like '/..%2Fadmin'. This can be used for open redirect attacks to internal pages, possibly bypassing access controls after login."
+  }
+]

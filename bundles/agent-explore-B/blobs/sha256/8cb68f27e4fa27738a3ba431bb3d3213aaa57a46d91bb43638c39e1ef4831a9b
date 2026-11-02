@@ -1,0 +1,15 @@
+[
+  {
+    "cwe": 20,
+    "locations": [
+      {
+        "file": "profilehub/service.py",
+        "symbol": "admin_update",
+        "start_line": 31,
+        "end_line": 41,
+        "role": "site"
+      }
+    ],
+    "description": "The admin_update function allows an administrator to set the 'role' attribute to any string without validation. This can lead to arbitrary role values, potentially causing privilege escalation or bypassing role‑based checks elsewhere in the system."
+  }
+]

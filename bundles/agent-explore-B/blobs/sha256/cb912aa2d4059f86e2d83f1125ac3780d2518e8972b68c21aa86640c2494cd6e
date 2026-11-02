@@ -1,0 +1,28 @@
+[
+  {
+    "cwe": 284,
+    "locations": [
+      {
+        "file": "profilehub/service.py",
+        "symbol": "update_profile",
+        "start_line": 28,
+        "end_line": 31,
+        "role": "site"
+      }
+    ],
+    "description": "The `update_profile` function allows a user to modify any attribute of their own User object that exists (`hasattr`). This bypasses the intended SELF_EDITABLE whitelist, enabling privilege escalation (e.g., changing role or is_active)."
+  },
+  {
+    "cwe": 284,
+    "locations": [
+      {
+        "file": "profilehub/service.py",
+        "symbol": "admin_update",
+        "start_line": 40,
+        "end_line": 43,
+        "role": "site"
+      }
+    ],
+    "description": "`admin_update` permits setting the `role` field to any string without validation against allowed roles, allowing an admin to grant themselves or others arbitrary privileges."
+  }
+]

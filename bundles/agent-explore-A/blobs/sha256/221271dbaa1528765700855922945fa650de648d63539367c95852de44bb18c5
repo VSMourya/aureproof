@@ -1,0 +1,29 @@
+[
+  {
+    "cwe": 918,
+    "locations": [
+      {
+        "file": "linkpreview/service.py",
+        "symbol": "fetch_preview",
+        "start_line": 27,
+        "end_line": 35,
+        "role": "site"
+      },
+      {
+        "file": "linkpreview/net.py",
+        "symbol": "next_location",
+        "start_line": 49,
+        "end_line": 54,
+        "role": "source"
+      },
+      {
+        "file": "linkpreview/service.py",
+        "symbol": "fetch_preview",
+        "start_line": 30,
+        "end_line": 30,
+        "role": "sink"
+      }
+    ],
+    "description": "fetch_preview only validates the initial URL with check_url; each 3xx Location produced by next_location (via urljoin) is assigned to current and fetched by transport.send without re-validation, so an open redirect or malicious response on an allowed host (news.example/blog.example/cdn.example) makes the service fetch and return arbitrary URLs (e.g. http://169.254.169.254/latest/meta-data or internal services, and even non-http(s) schemes), bypassing the ALLOWED_HOSTS/scheme allowlist."
+  }
+]

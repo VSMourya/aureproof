@@ -1,0 +1,15 @@
+[
+  {
+    "cwe": 22,
+    "locations": [
+      {
+        "file": "reportvault/service.py",
+        "symbol": "download_attachment",
+        "start_line": 28,
+        "end_line": 32,
+        "role": "site"
+      }
+    ],
+    "description": "download_attachment validates the raw percent‑encoded name with is_plain_name, which does not reject percent‑encoded path separators. After decoding, the code joins the name to the attachments directory without using safe_join, allowing a crafted name like 'evil%2F..%2Fsecret.txt' to traverse outside the vault and read arbitrary files."
+  }
+]

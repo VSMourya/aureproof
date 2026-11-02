@@ -1,0 +1,100 @@
+{
+  "schema": "aureproof.labels/v0.1",
+  "task_id": "authz-002",
+  "task_revision": "0.1.0-draft",
+  "cluster_id": "authz-002",
+  "canary": "c5a2dc45-5c39-4e94-a69b-f6efc32f6f25",
+  "oracle_canary": "709db802-31b6-4556-a1b7-ff88348530a6",
+  "defects": [
+    {
+      "defect_id": "authz-002-d1",
+      "variants": [
+        "vulnerable"
+      ],
+      "summary": "get_invoice checks that the user belongs to the tenant named in the request's X-Tenant header, then looks the invoice up by id across every tenant and never checks invoice.tenant_id, so a member of one tenant reads another tenant's invoice by sending their own tenant and a foreign invoice_id through handle_request. void_invoice and share_invoice use _in_tenant, which does check.",
+      "accepted_cwes": [
+        284,
+        285,
+        566,
+        639,
+        862,
+        863
+      ],
+      "anchors": [
+        {
+          "file": "invoicer/service.py",
+          "symbol": "get_invoice",
+          "line_range": [
+            40,
+            45
+          ],
+          "role": "site"
+        },
+        {
+          "file": "invoicer/api.py",
+          "symbol": "handle_request",
+          "line_range": [
+            22,
+            63
+          ],
+          "role": "source"
+        }
+      ],
+      "calibration_poc": "calibration_poc.py"
+    }
+  ],
+  "focal_negative": {
+    "variant": "repaired",
+    "anchors": [
+      {
+        "file": "invoicer/service.py",
+        "symbol": "get_invoice",
+        "line_range": [
+          40,
+          45
+        ],
+        "role": "site"
+      },
+      {
+        "file": "invoicer/api.py",
+        "symbol": "handle_request",
+        "line_range": [
+          22,
+          63
+        ],
+        "role": "source"
+      }
+    ]
+  },
+  "reviewed_negative_scope": [
+    {
+      "file": "invoicer/service.py",
+      "symbol": "shared_view",
+      "note": "decoy: intentionally public; a holder of an unguessable share token gets a read-only view, compared in constant time"
+    },
+    {
+      "file": "invoicer/service.py",
+      "symbol": "void_invoice",
+      "note": "decoy: role-checked and confined to the tenant by _in_tenant"
+    },
+    {
+      "file": "invoicer/service.py",
+      "symbol": "share_invoice",
+      "note": "decoy: role-checked and confined to the tenant by _in_tenant"
+    },
+    {
+      "file": "invoicer/service.py",
+      "symbol": "list_invoices"
+    },
+    {
+      "file": "invoicer/service.py",
+      "symbol": "_in_tenant"
+    },
+    {
+      "file": "invoicer/auth.py"
+    },
+    {
+      "file": "invoicer/models.py"
+    }
+  ]
+}

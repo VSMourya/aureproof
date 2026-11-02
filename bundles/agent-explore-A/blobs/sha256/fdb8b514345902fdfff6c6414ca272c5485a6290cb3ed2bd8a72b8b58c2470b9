@@ -1,0 +1,22 @@
+[
+  {
+    "cwe": 613,
+    "locations": [
+      {
+        "file": "profilehub/api.py",
+        "symbol": "handle_request",
+        "start_line": 27,
+        "end_line": 36,
+        "role": "site"
+      },
+      {
+        "file": "profilehub/service.py",
+        "symbol": "deactivate",
+        "start_line": 53,
+        "end_line": 58,
+        "role": "site"
+      }
+    ],
+    "description": "Deactivation is never enforced: ``deactivate`` sets ``is_active = False`` but no code path ever checks that flag, so a deactivated member retains full API access (profile and settings edits). Worse, a deactivated administrator keeps all admin powers and can reactivate themselves (action 'admin' with changes {'is_active': True}) or promote other accounts, making deactivation completely ineffective as an access-revocation control."
+  }
+]
