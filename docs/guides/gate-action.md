@@ -42,7 +42,8 @@ Any mismatch lists every problem and exits 2.
 The report shows the protocol, both system identities, the repetitions, the margin and
 alpha, and a per-cluster table of confirmed and submitted counts, unresolved findings
 and the exact difference. It also gives the exact two-sided p, the test-inversion CI,
-and Wilson intervals per configuration. Quality metrics and operational ones
+and Wilson intervals per configuration, which count clusters, not findings, as
+independent (specs/decision §4). Quality metrics and operational ones
 (completion, refusals, infrastructure failures) are listed separately for each
 configuration. The uncertainty covers the fixed suite's clusters only. It is not a claim
 about a wider population of tasks.

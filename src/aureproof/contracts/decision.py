@@ -120,6 +120,7 @@ class Decision(Contract):
     p_value_two_sided: NonEmptyStr | None  # exact rational at delta0 = 0
     ci: Interval
     min_clusters_for_decision: int
+    # Pooled yield per configuration; clusters are the independent units (§4).
     wilson_a: Interval
     wilson_b: Interval
     cluster_table: list[ClusterRow]

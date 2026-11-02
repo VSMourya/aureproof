@@ -1598,5 +1598,153 @@
       "upper": null,
       "source": "no trials: undefined"
     }
+  ],
+  "clustered_wilson": [
+    {
+      "id": "CW-01",
+      "clusters": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "alpha": 0.025,
+      "lower": null,
+      "upper": null,
+      "derivation": "No cluster has a trial: no interval (None), as for wilson with 0 trials."
+    },
+    {
+      "id": "CW-02",
+      "clusters": [
+        [
+          3,
+          10
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "alpha": 0.025,
+      "lower": 0.0,
+      "upper": 1.0,
+      "derivation": "Only one cluster has trials. One independent unit cannot bound a proportion: t with 0 degrees of freedom is unbounded, and the score interval tends to [0, 1]."
+    },
+    {
+      "id": "CW-03",
+      "clusters": [
+        [
+          1,
+          4
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          1,
+          4
+        ]
+      ],
+      "alpha": 0.025,
+      "lower": 0.031859728,
+      "upper": 0.771501616,
+      "derivation": "The M2 live slice shape: R = 3/12 = 1/4, every residual c - R n = 1 - 1 = 0, so V = 0 and the effective n is N = 12 (Korn-Graubard convention). k = 3 gives t(0.975, 2) = 0.95 * sqrt(2 / 0.0975) = 4.30265. Wilson(1/4, 12, 4.30265) = [0.031860, 0.771502]; the naive interval with z = 1.95996 is [0.088942, 0.532305]."
+    },
+    {
+      "id": "CW-04",
+      "clusters": [
+        [
+          0,
+          4
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          4,
+          4
+        ]
+      ],
+      "alpha": 0.025,
+      "lower": 0.122753883,
+      "upper": 0.877246117,
+      "derivation": "Clusters all-or-nothing: R = 12/24 = 1/2, residuals +-2, sum of squares 24, V = (6/5) * 24 / 576 = 1/20, effective n = (1/4) / (1/20) = 5 (not 24). t(0.975, 5) = 2.570582. Wilson(1/2, 5, 2.570582): centre 1/2, half = 2.570582 * sqrt(1/20 + 6.607891/100) / 2.321578 = 0.377246, so [0.122754, 0.877246]. The naive interval is [0.314274, 0.685726]."
+    },
+    {
+      "id": "CW-05",
+      "clusters": [
+        [
+          5,
+          10
+        ],
+        [
+          6,
+          10
+        ],
+        [
+          5,
+          10
+        ],
+        [
+          6,
+          10
+        ]
+      ],
+      "alpha": 0.025,
+      "lower": 0.316050847,
+      "upper": 0.763744932,
+      "derivation": "Clusters agree more than independent trials would: R = 22/40 = 0.55, residuals +-1/2, V = (4/3) * 1 / 1600 = 1/1200, R (1 - R) / V = 297 > N = 40, so the effective n is capped at 40. Only the quantile changes: t(0.975, 3) = 3.182446. Wilson(0.55, 40, 3.182446) = [0.316051, 0.763745]."
+    },
+    {
+      "id": "CW-06",
+      "clusters": [
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "alpha": 0.025,
+      "lower": 0.0,
+      "upper": 0.268527318,
+      "derivation": "Nothing confirmed: R = 0, V = 0, effective n = N = 18, t(0.975, 5) = 2.570582. The lower bound is 0 and the upper is t^2 / (N + t^2) = 6.607891 / 24.607891 = 0.268527."
+    }
   ]
 }

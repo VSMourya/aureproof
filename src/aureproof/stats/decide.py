@@ -9,7 +9,7 @@ from fractions import Fraction
 
 from aureproof.contracts.decision import ClusterRow, Decision, DecisionProtocol, Interval
 from aureproof.stats.permutation import min_clusters, sign_flip
-from aureproof.stats.wilson import wilson
+from aureproof.stats.wilson import clustered_wilson
 
 
 def _rate(confirmed: int, submitted: int, policy: str) -> Fraction | None:
@@ -42,12 +42,9 @@ def decide(protocol: DecisionProtocol, rows: Sequence[ClusterRow]) -> Decision:
             diffs.append(diff)
         table.append(row.model_copy(update={"difference": _fmt(diff)}))
     needed = min_clusters(alpha)
-    wa = _interval(
-        wilson(sum(r.a_confirmed for r in rows), sum(r.a_submitted for r in rows), alpha)
-    )
-    wb = _interval(
-        wilson(sum(r.b_confirmed for r in rows), sum(r.b_submitted for r in rows), alpha)
-    )
+    # Pooled yield per configuration, with clusters (not findings) as the independent units.
+    wa = _interval(clustered_wilson([(r.a_confirmed, r.a_submitted) for r in rows], alpha))
+    wb = _interval(clustered_wilson([(r.b_confirmed, r.b_submitted) for r in rows], alpha))
 
     def build(outcome: str, provisional: str, reason: str, **stats: object) -> Decision:
         return Decision.model_validate(

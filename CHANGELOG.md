@@ -30,6 +30,16 @@ public API and the specs may change between minor versions).
   development data, not the pre-registered assessment.
 
 ### Fixed
+- The per-configuration Wilson intervals in a Decision counted every finding as an
+  independent trial, although the gate itself treats clusters as the independent
+  units. Findings of one episode and the episodes of one task are correlated, so the
+  "95%" interval was too narrow: in a simulated six-task cohort it covered the target
+  yield 74% of the time. `wilson_a` and `wilson_b` now use the effective sample size
+  from the cluster-robust variance and Student's t with k − 1 degrees of freedom
+  (`stats.clustered_wilson`, specs/decision §4, vectors CW-01 to CW-06); coverage is
+  94–95% in the same simulation (`scripts/wilson_coverage.py`). The live slice's yield
+  3/12 over three clusters was reported as [0.089, 0.532] and is [0.032, 0.772]. The
+  decision itself is unchanged.
 - The SBOM was kept only as a workflow-run artifact, which expires, not attached to
   the GitHub release as the 0.1.0a1 notes said. `release.yml` has a new `attach` job:
   after PyPI accepts the files it signs the wheel, the sdist and the SBOM with the

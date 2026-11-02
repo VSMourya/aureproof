@@ -57,7 +57,19 @@ every row.
 - **If r = 0**, no finite bound exists. At α = 0.025 that holds exactly when **k < 6**,
   and the Decision reports that k clusters cannot reach a decisive outcome.
 - **Wilson score intervals** for each configuration's pooled yield are reported
-  alongside, at the same level.
+  alongside, at the same level, with **clusters as the independent units**, as in the
+  test. Findings of one episode, and the episodes of one task, are not independent
+  trials; counting them as such covered a 95% target about 74% of the time in a
+  simulated six-task cohort (`scripts/wilson_coverage.py`). With k clusters that have
+  submissions, pooled yield R over N findings, and residuals rᶜ = cᶜ − R·nᶜ:
+  - V = k/(k − 1) · Σ rᶜ² / N² (the linearised cluster-robust variance of the ratio);
+  - the effective sample size is n* = R(1 − R)/V, capped at N, and N when V = 0;
+  - the interval is the Wilson score interval with n* trials and Student's t with
+    k − 1 degrees of freedom in place of z (Korn and Graubard 1998; Dean and Pagano
+    2015). It is never narrower than the naive one.
+  - k = 1 gives [0, 1] (one unit bounds nothing); no findings at all gives no interval.
+  Vectors: `clustered_wilson` (CW-01 to CW-06). These intervals are descriptive; the
+  decision uses only the exact test.
 
 ## 5. Decision rule
 

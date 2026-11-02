@@ -223,8 +223,8 @@ def render_comparison(comparison: Any) -> str:
         f"{d.min_clusters_for_decision} are needed for a decisive outcome.",
         f"- Mean difference {d.mean_difference}; exact two-sided p {d.p_value_two_sided}; "
         f"CI [{d.ci.lower}, {d.ci.upper}].",
-        f"- Wilson intervals: A [{d.wilson_a.lower}, {d.wilson_a.upper}], "
-        f"B [{d.wilson_b.lower}, {d.wilson_b.upper}].",
+        f"- Wilson intervals, clusters as the independent units: "
+        f"A [{d.wilson_a.lower}, {d.wilson_a.upper}], B [{d.wilson_b.lower}, {d.wilson_b.upper}].",
     ]
     if d.provisional_outcome != d.outcome:
         lines.append(f"- Provisional outcome {d.provisional_outcome}, not final: {d.reason}.")
