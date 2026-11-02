@@ -17,7 +17,7 @@ public API and the specs may change between minor versions).
   pairs (`bundles/agent-explore-A/`, `bundles/agent-explore-B/`). Both bundles are
   valid and re-score offline. Recall is 16/18 for each, and the gate is inconclusive
   (CI [-1/4, 4/5] spans the margin). `docs/research/agent-explore.md` has the run
-  log.
+  log. Both bundles are signed by `sign.yml` and verify offline.
 - `aureproof task probe --model openai-api/<service>/<model>` runs the single-shot
   baseline against an OpenAI-compatible endpoint, reading `<SERVICE>_BASE_URL` (https
   only) and `<SERVICE>_API_KEY` as Inspect does. One Chat Completions request per

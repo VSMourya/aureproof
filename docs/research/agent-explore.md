@@ -18,7 +18,7 @@ Linux host.
 | Protocol signed | `sign.yml` on main, run 41364545535; Rekor log index 3637054550 at 2026-11-01T23:56:54Z; [`protocol.json.sigstore.json`](../../protocols/agent-explore/protocol.json.sigstore.json) |
 | Episodes | started 2026-11-01T23:58:00Z; B finished 00:10:45Z and A 01:28:18Z on 2026-11-02 |
 | Bundles | [`bundles/agent-explore-A/`](../../bundles/agent-explore-A/) and [`bundles/agent-explore-B/`](../../bundles/agent-explore-B/): valid, offline re-score `reproduced` |
-| Bundle signatures | follow-up, from `sign.yml` once the bundles are on main |
+| Bundle signatures | `sign.yml` on main: A run 41376680980 (Rekor 3637354675, 2026-11-02T02:15:09Z), B run 41376687373 (Rekor 3637354809, 02:15:14Z); `seal.sigstore.json` in each bundle. `aureproof compare --require-signature` gives the same outcome |
 
 The first launch passed the THR options to `aureproof run` as one argument and stopped at
 the usage error, before any dispatch. Before the protocol was written, one smoke episode
