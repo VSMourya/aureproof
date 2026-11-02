@@ -1,0 +1,389 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Aureproof end-to-end flow",
+    "output": ".archify/workflow-aureproof-flow-20261101-1330/aureproof-flow.html",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "repository": {
+      "url": "https://github.com/bhargavchintam/aureproof.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "8c99d4f3aed589b1a955a51af8e7d593756cc8df"
+    }
+  },
+  "lanes": [
+    {
+      "id": "author",
+      "label": "Maintainer"
+    },
+    {
+      "id": "controller",
+      "label": "Trusted controller"
+    },
+    {
+      "id": "sandbox",
+      "label": "Agent sandbox"
+    },
+    {
+      "id": "anyone",
+      "label": "Anyone, offline"
+    },
+    {
+      "id": "stops",
+      "label": "Fail-closed stops",
+      "variant": "exception"
+    }
+  ],
+  "phases": [
+    {
+      "id": "prepare",
+      "label": "Prove the instrument",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "record",
+      "label": "Run, record, decide",
+      "fromCol": 2,
+      "toCol": 5,
+      "variant": "emphasis"
+    }
+  ],
+  "mainPath": [
+    "pair",
+    "health",
+    "protocol",
+    "dispatch",
+    "agent",
+    "match",
+    "seal",
+    "verify",
+    "gate"
+  ],
+  "nodes": [
+    {
+      "id": "pair",
+      "lane": "author",
+      "col": 0,
+      "type": "external",
+      "label": "Author task pair",
+      "sublabel": "vulnerable + repaired",
+      "sources": [
+        {
+          "path": "fixtures/DATASET_CARD.md"
+        }
+      ]
+    },
+    {
+      "id": "health",
+      "lane": "author",
+      "col": 1,
+      "type": "security",
+      "label": "Health controls",
+      "sublabel": "task validate",
+      "tag": "THR: HEALTHY",
+      "sources": [
+        {
+          "path": "src/aureproof/oracles/calibration.py",
+          "line": 133,
+          "end_line": 272,
+          "label": "run_controls"
+        },
+        {
+          "path": "src/aureproof/cli/main.py",
+          "line": 295,
+          "end_line": 338,
+          "label": "task validate"
+        }
+      ]
+    },
+    {
+      "id": "protocol",
+      "lane": "author",
+      "col": 2,
+      "type": "cloud",
+      "label": "Sign protocol",
+      "sublabel": "before the run",
+      "sources": [
+        {
+          "path": ".github/workflows/sign.yml",
+          "line": 29,
+          "end_line": 49
+        }
+      ]
+    },
+    {
+      "id": "dispatch",
+      "lane": "controller",
+      "col": 2,
+      "type": "backend",
+      "label": "aureproof run",
+      "sublabel": "one attempt each",
+      "sources": [
+        {
+          "path": "src/aureproof/cli/main.py",
+          "line": 339,
+          "end_line": 399
+        },
+        {
+          "path": "src/aureproof/runners/orchestrate.py",
+          "line": 37,
+          "end_line": 127
+        }
+      ]
+    },
+    {
+      "id": "agent",
+      "lane": "sandbox",
+      "col": 2,
+      "type": "frontend",
+      "label": "Agent works",
+      "sublabel": "network none",
+      "tag": "findings.json",
+      "sources": [
+        {
+          "path": "src/aureproof/runners/compose.yaml",
+          "line": 6,
+          "end_line": 14
+        },
+        {
+          "path": "src/aureproof/runners/inspect_runner.py",
+          "line": 299,
+          "end_line": 328,
+          "label": "collect findings"
+        }
+      ]
+    },
+    {
+      "id": "match",
+      "lane": "controller",
+      "col": 3,
+      "type": "backend",
+      "label": "Label matcher",
+      "sublabel": "verdicts",
+      "sources": [
+        {
+          "path": "src/aureproof/scoring/matcher.py",
+          "line": 115,
+          "end_line": 195
+        }
+      ]
+    },
+    {
+      "id": "seal",
+      "lane": "controller",
+      "col": 4,
+      "type": "database",
+      "label": "Seal and sign",
+      "sublabel": "evidence bundle",
+      "sources": [
+        {
+          "path": "src/aureproof/bundle/run.py",
+          "line": 118,
+          "end_line": 190
+        },
+        {
+          "path": "src/aureproof/signing/sigstore_adapter.py",
+          "line": 24,
+          "end_line": 46
+        }
+      ]
+    },
+    {
+      "id": "verify",
+      "lane": "anyone",
+      "col": 4,
+      "type": "external",
+      "label": "Verify, re-score",
+      "sublabel": "reproduced",
+      "sources": [
+        {
+          "path": "src/aureproof/bundle/validate.py",
+          "line": 110,
+          "end_line": 244
+        },
+        {
+          "path": "src/aureproof/bundle/run.py",
+          "line": 199,
+          "end_line": 236
+        }
+      ]
+    },
+    {
+      "id": "gate",
+      "lane": "anyone",
+      "col": 5,
+      "type": "security",
+      "label": "Comparison gate",
+      "sublabel": "exit 0, 1, 3 or 2",
+      "tag": "pass, fail, inconclusive",
+      "sources": [
+        {
+          "path": "src/aureproof/bundle/compare.py",
+          "line": 193,
+          "end_line": 243
+        },
+        {
+          "path": "src/aureproof/stats/decide.py",
+          "line": 31,
+          "end_line": 96
+        },
+        {
+          "path": "src/aureproof/cli/main.py",
+          "line": 622,
+          "end_line": 684
+        }
+      ]
+    },
+    {
+      "id": "unhealthy",
+      "lane": "stops",
+      "col": 1,
+      "type": "security",
+      "label": "Run refuses",
+      "sublabel": "THR not healthy",
+      "sources": [
+        {
+          "path": "src/aureproof/runners/slice.py",
+          "line": 69,
+          "end_line": 81
+        }
+      ]
+    },
+    {
+      "id": "tools",
+      "lane": "stops",
+      "col": 3,
+      "type": "security",
+      "label": "Not graded",
+      "sublabel": "undeclared tools",
+      "sources": [
+        {
+          "path": "src/aureproof/runners/port.py",
+          "line": 145,
+          "end_line": 151
+        }
+      ]
+    },
+    {
+      "id": "incomplete",
+      "lane": "stops",
+      "col": 5,
+      "type": "security",
+      "label": "Gate refuses",
+      "sublabel": "sealed incomplete",
+      "sources": [
+        {
+          "path": "src/aureproof/bundle/compare.py",
+          "line": 145,
+          "end_line": 151
+        },
+        {
+          "path": "src/aureproof/bundle/run.py",
+          "line": 136,
+          "end_line": 143
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "e-pair-health",
+      "from": "pair",
+      "to": "health",
+      "variant": "default"
+    },
+    {
+      "id": "e-health-protocol",
+      "from": "health",
+      "to": "protocol",
+      "label": "healthy",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e-protocol-dispatch",
+      "from": "protocol",
+      "to": "dispatch",
+      "label": "frozen rules",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e-dispatch-agent",
+      "from": "dispatch",
+      "to": "agent",
+      "label": "task files",
+      "variant": "security"
+    },
+    {
+      "id": "e-agent-match",
+      "from": "agent",
+      "to": "match",
+      "label": "findings",
+      "variant": "default"
+    },
+    {
+      "id": "e-match-seal",
+      "from": "match",
+      "to": "seal",
+      "variant": "default"
+    },
+    {
+      "id": "e-seal-verify",
+      "from": "seal",
+      "to": "verify",
+      "label": "signed bundle",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e-verify-gate",
+      "from": "verify",
+      "to": "gate",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e-health-stop",
+      "from": "dispatch",
+      "to": "unhealthy",
+      "label": "not healthy",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e-tools-stop",
+      "from": "agent",
+      "to": "tools",
+      "label": "tool drift",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e-incomplete-stop",
+      "from": "gate",
+      "to": "incomplete",
+      "label": "incomplete",
+      "variant": "security",
+      "role": "error"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "What a third party gets",
+      "items": [
+        "The signature checks offline against sign.yml on main",
+        "Every metric recomputes from saved records, byte for byte"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Fail closed, never quiet",
+      "items": [
+        "An unhealthy task never runs",
+        "An episode with undeclared tools is an infra failure",
+        "Incomplete evidence cannot pass the gate"
+      ]
+    }
+  ]
+}
