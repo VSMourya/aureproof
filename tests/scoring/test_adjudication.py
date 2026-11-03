@@ -129,6 +129,18 @@ def test_a_later_record_supersedes_without_erasing(episodes: list[tuple[str, Any
     assert resolve(items, [again, first])[0].decision.value == "confirmed"  # type: ignore[union-attr]
 
 
+def test_the_latest_record_is_the_latest_instant(episodes: list[tuple[str, Any]]) -> None:
+    items = queue(episodes)
+    # Half a second later: as strings, ".5Z" sorts before "Z" and the old record would win.
+    first = record(1, "refuted", timestamp="2026-10-28T12:00:00Z")
+    again = record(1, "confirmed", timestamp="2026-10-28T12:00:00.5Z")
+    assert resolve(items, [again, first])[0].decision.value == "confirmed"  # type: ignore[union-attr]
+    split = [record(2, "refuted"), record(2, "confirmed", who="ben", role="second")]
+    early = record(2, "refuted", who="cy", role="resolution", timestamp="2026-10-28T13:00:00.1Z")
+    late = record(2, "confirmed", who="dee", role="resolution", timestamp="2026-10-28T13:00:00.15Z")
+    assert resolve(items, [*split, late, early])[1].decision.value == "confirmed"  # type: ignore[union-attr]
+
+
 def test_post_adjudication_counts_keep_label_changes_and_pending_unresolved(
     episodes: list[tuple[str, Any]],
 ) -> None:

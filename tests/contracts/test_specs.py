@@ -13,6 +13,7 @@ import pytest
 from pydantic import BaseModel, ValidationError
 
 from aureproof.contracts import AttemptRecord, EpisodeSpec, MetricRecord, SystemSpec, TaskSpec
+from aureproof.contracts.specs import utc_instant
 
 ROOT = Path(__file__).resolve().parents[2]
 VECTORS = ROOT / "conformance" / "contracts" / "v0.1"
@@ -156,3 +157,47 @@ def test_attempt_ids_follow_their_episode() -> None:
         status="planned",
     )
     assert attempt.attempt_id.startswith(episode.episode_id)
+
+
+def _attempt(started_at: str, ended_at: str) -> AttemptRecord:
+    return AttemptRecord(
+        episode_id="ep-1",
+        attempt_index=0,
+        attempt_id="ep-1/a0",
+        reason="initial",
+        status="completed",
+        runner_run_id="run-1",
+        started_at=started_at,
+        ended_at=ended_at,
+    )
+
+
+def test_attempt_times_are_ordered_as_instants() -> None:
+    _attempt("2026-10-29T12:00:00Z", "2026-10-29T12:00:00.5Z")  # half a second later
+    _attempt("2026-10-29T12:00:00.1Z", "2026-10-29T12:00:00.15Z")
+    _attempt("2026-10-29T12:00:00.5Z", "2026-10-29T12:00:00.500Z")  # the same instant
+    with pytest.raises(ValidationError, match="precedes"):
+        _attempt("2026-10-29T12:00:00.5Z", "2026-10-29T12:00:00Z")
+    with pytest.raises(ValidationError, match="precedes"):
+        _attempt("2026-10-29T12:00:00.15Z", "2026-10-29T12:00:00.1Z")
+
+
+@pytest.mark.parametrize(
+    ("earlier", "later"),
+    [
+        ("2026-10-29T12:00:00Z", "2026-10-29T12:00:00.5Z"),
+        ("2026-10-29T12:00:00.1Z", "2026-10-29T12:00:00.15Z"),
+        ("2026-10-29T23:59:59.999999999Z", "2026-10-30T00:00:00Z"),
+        ("1999-12-31T23:59:59Z", "2026-01-01T00:00:00Z"),
+    ],
+)
+def test_utc_instant_orders_like_time(earlier: str, later: str) -> None:
+    assert utc_instant(earlier) < utc_instant(later)
+
+
+def test_utc_instant_ignores_trailing_zeros_and_refuses_other_forms() -> None:
+    assert utc_instant("2026-10-29T12:00:00.5Z") == utc_instant("2026-10-29T12:00:00.500000000Z")
+    assert utc_instant("1970-01-01T00:00:01.000000001Z") == 1_000_000_001
+    for bad in ("2026-10-29T12:00:00+00:00", "2026-10-29 12:00:00Z", "2026-02-30T00:00:00Z"):
+        with pytest.raises(ValueError, match="RFC 3339"):
+            utc_instant(bad)
