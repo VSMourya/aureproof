@@ -36,6 +36,14 @@ public API and the specs may change between minor versions).
   development data, not the pre-registered assessment.
 
 ### Fixed
+- `aureproof compare` trusted the health records a decision rests on. It never checked a
+  pinned THR's `status` (only the runner's `slice.plan` refused a THR that is not
+  healthy), and never checked that the THR vouched for the grader that scored the run:
+  its `scoring_identity` was recorded and never read. The gate now fails closed when a
+  pinned THR is `unhealthy` or `unknown`, when its scoring identity differs from the
+  seal's `scoring_profile`, when the seal names no readable profile, or when a re-scored
+  episode carries another identity than the seal names. Every committed example and
+  bundle pins healthy THRs under the current identity, so no result changes.
 - Timestamps were ordered as strings, but `UtcTimestamp` allows an optional fraction of
   any length, so `…00:00:00.5Z` sorted before `…00:00:00Z`. A Task Health Record frozen
   half a second after the protocol freeze was applied as pre-registered and could exclude
