@@ -126,17 +126,6 @@ class DecisionProtocol(Contract):
             )
         return self
 
-    @model_validator(mode="after")
-    def _evaluable(self) -> Self:
-        """Refused when written, not discovered when the gate runs after the assessment."""
-        clusters = len({t.cluster_id for t in self.cohort})
-        if clusters > MAX_CLUSTERS:
-            raise ValueError(
-                f"the exact gate decides at most {MAX_CLUSTERS} clusters; "
-                f"this cohort names {clusters}"
-            )
-        return self
-
     @property
     def identity(self) -> str:
         return content_identity(self)
