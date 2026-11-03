@@ -1,0 +1,22 @@
+[
+  {
+    "cwe": 601,
+    "locations": [
+      {
+        "file": "portalauth/api.py",
+        "symbol": "handle_request",
+        "start_line": 17,
+        "end_line": 17,
+        "role": "source"
+      },
+      {
+        "file": "portalauth/service.py",
+        "symbol": "finish_login",
+        "start_line": 23,
+        "end_line": 27,
+        "role": "sink"
+      }
+    ],
+    "description": "finish_login validates the attacker-controlled post-login redirect target with only next_url.startswith('/'), so a protocol-relative URL like '//evil.example' (or '/\\evil.example') is accepted and returned as the 302 Location, which browsers resolve to the external host. A crafted sign-in link can thus send a freshly authenticated user to an attacker-controlled phishing site; the stricter is_local_path() check is applied to logout but not here."
+  }
+]

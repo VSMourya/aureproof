@@ -1,0 +1,28 @@
+[
+  {
+    "cwe": 601,
+    "locations": [
+      {
+        "file": "portalauth/service.py",
+        "symbol": "finish_login",
+        "start_line": 23,
+        "end_line": 27,
+        "role": "site"
+      }
+    ],
+    "description": "The login flow accepts a user-controlled 'next' URL and only checks that it starts with '/'. Strings like '///evil.com' pass this test and cause the browser to navigate to an external site, resulting in an open redirect vulnerability."
+  },
+  {
+    "cwe": 284,
+    "locations": [
+      {
+        "file": "portalauth/service.py",
+        "symbol": "finish_logout",
+        "start_line": 30,
+        "end_line": 32,
+        "role": "site"
+      }
+    ],
+    "description": "The logout endpoint deletes a session based solely on a supplied session identifier without any authentication check, allowing an attacker to force-log out any user if they can guess or obtain a valid session ID. This is an improper access control issue."
+  }
+]

@@ -1,0 +1,29 @@
+[
+  {
+    "cwe": 863,
+    "locations": [
+      {
+        "file": "profilehub/api.py",
+        "symbol": "handle_request",
+        "start_line": 28,
+        "end_line": 36,
+        "role": "site"
+      },
+      {
+        "file": "profilehub/service.py",
+        "symbol": "deactivate",
+        "start_line": 94,
+        "end_line": 99,
+        "role": "source"
+      },
+      {
+        "file": "profilehub/service.py",
+        "symbol": "admin_update",
+        "start_line": 75,
+        "end_line": 84,
+        "role": "sink"
+      }
+    ],
+    "description": "Deactivated (is_active=False) members are never denied service: request handling and every service function check ownership/admin role but never actor.is_active, so a deactivated member keeps full API access. Worse, a deactivated admin can still invoke the 'admin' action on any member — including reactivating their own account (admin_update sets is_active/role with only an is_admin check) — making deactivation useless as an access-control measure."
+  }
+]

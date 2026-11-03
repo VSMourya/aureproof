@@ -1,0 +1,29 @@
+[
+  {
+    "cwe": 863,
+    "locations": [
+      {
+        "file": "docstore/auth.py",
+        "symbol": "can_read",
+        "start_line": 18,
+        "end_line": 19,
+        "role": "site"
+      },
+      {
+        "file": "docstore/service.py",
+        "symbol": "list_public_titles",
+        "start_line": 76,
+        "end_line": 78,
+        "role": "site"
+      },
+      {
+        "file": "docstore/models.py",
+        "symbol": "Document",
+        "start_line": 22,
+        "end_line": 22,
+        "role": "site"
+      }
+    ],
+    "description": "The Document model has a 'public' flag documented as making a document 'readable by anyone' (list_public_titles), but the read authorization check can_read never consults it: only admins, the owner, or users in shared_with may read. Every document an owner marked public remains unreadable to anyone else through read_document/handle_request, so the access-control policy is implemented incorrectly and the public-sharing feature is broken (denies legitimate access to public data while owners believe it is shared)."
+  }
+]

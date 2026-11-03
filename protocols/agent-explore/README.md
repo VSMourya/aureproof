@@ -34,3 +34,11 @@ protocol ran; the only prior evidence was the single-shot difficulty probes.
 - Before this protocol was written, one smoke episode pair (`path-001`, B, one
   repetition) ran under a separate scratch protocol to qualify the endpoint. It is not
   part of this protocol and is not reported as a result.
+
+## Status
+
+Signed by `sign.yml` on main (Rekor 2026-11-01T23:56:54Z) before the first episode
+(23:58:00Z). Both configurations ran: [`bundles/agent-explore-A/`](../../bundles/agent-explore-A/),
+[`bundles/agent-explore-B/`](../../bundles/agent-explore-B/). The gate's outcome is
+inconclusive; the run log is [`docs/research/agent-explore.md`](../../docs/research/agent-explore.md).
+

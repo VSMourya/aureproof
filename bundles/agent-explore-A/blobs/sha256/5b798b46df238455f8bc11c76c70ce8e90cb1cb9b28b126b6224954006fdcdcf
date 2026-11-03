@@ -1,0 +1,22 @@
+[
+  {
+    "cwe": 639,
+    "locations": [
+      {
+        "file": "invoicer/api.py",
+        "symbol": "handle_request",
+        "start_line": 43,
+        "end_line": 47,
+        "role": "source"
+      },
+      {
+        "file": "invoicer/service.py",
+        "symbol": "get_invoice",
+        "start_line": 40,
+        "end_line": 45,
+        "role": "sink"
+      }
+    ],
+    "description": "get_invoice checks only that the caller is a member of the claimed tenant, then looks up the attacker-controlled invoice_id in the globally-keyed store without verifying the invoice belongs to that tenant (unlike _in_tenant used by void_invoice and share_invoice). Any member of one tenant can read any other tenant's invoice (customer, amount) by passing their own X-Tenant and the victim's invoice_id, breaking tenant isolation."
+  }
+]

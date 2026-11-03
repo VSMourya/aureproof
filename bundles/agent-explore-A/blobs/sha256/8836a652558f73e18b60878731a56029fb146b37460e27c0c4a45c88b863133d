@@ -1,0 +1,42 @@
+[
+  {
+    "cwe": 639,
+    "locations": [
+      {
+        "file": "invoicer/service.py",
+        "symbol": "get_invoice",
+        "start_line": 103,
+        "end_line": 108,
+        "role": "sink"
+      },
+      {
+        "file": "invoicer/api.py",
+        "symbol": "handle_request",
+        "start_line": 43,
+        "end_line": 47,
+        "role": "source"
+      }
+    ],
+    "description": "get_invoice authorizes the caller only against the client-controlled X-Tenant header, then fetches the invoice from the global store by invoice_id without checking invoice.tenant_id (unlike void_invoice/share_invoice, which use _in_tenant). Any user who is a member of any tenant can read another tenant's invoice by sending their own tenant id with the victim's invoice id: cross-tenant IDOR/BOLA."
+  },
+  {
+    "cwe": 248,
+    "locations": [
+      {
+        "file": "invoicer/service.py",
+        "symbol": "shared_view",
+        "start_line": 125,
+        "end_line": 127,
+        "role": "sink"
+      },
+      {
+        "file": "invoicer/api.py",
+        "symbol": "handle_request",
+        "start_line": 27,
+        "end_line": 31,
+        "role": "source"
+      }
+    ],
+    "description": "handle_request only validates that the share token is a non-empty string; shared_view feeds it to hmac.compare_digest, which raises TypeError for non-ASCII str inputs, and only NotFound is caught in the handler. An unauthenticated request with a non-ASCII token therefore triggers an uncaught exception, crashing the request handler (denial of service)."
+  }
+]

@@ -1,0 +1,15 @@
+[
+  {
+    "cwe": 601,
+    "locations": [
+      {
+        "file": "portalauth/service.py",
+        "symbol": "finish_login",
+        "start_line": 23,
+        "end_line": 27,
+        "role": "site"
+      }
+    ],
+    "description": "finish_login only checks that next_url starts with '/', which permits scheme‑relative URLs like '//evil.com'. Browsers treat such values as absolute URLs on another domain, resulting in an open‑redirect vulnerability (CWE‑601). An attacker can craft a login link with a malicious next parameter to redirect victims to phishing sites after sign‑in."
+  }
+]

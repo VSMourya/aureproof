@@ -1,0 +1,15 @@
+[
+  {
+    "cwe": 284,
+    "locations": [
+      {
+        "file": "profilehub/service.py",
+        "symbol": "update_profile",
+        "start_line": 22,
+        "end_line": 31,
+        "role": "site"
+      }
+    ],
+    "description": "The `update_profile` function allows a user to modify any attribute of their own User object that exists (using hasattr) without restricting to the self‑editable whitelist. An attacker can change privileged fields such as `role`, `is_active`, or replace `settings` with arbitrary data, leading to privilege escalation or data tampering."
+  }
+]

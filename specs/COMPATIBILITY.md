@@ -77,7 +77,7 @@ identity or a new spec dependency, and goes through a reviewed PR.
 | --- | --- | --- | --- |
 | Python | `>=3.12` | `pyproject.toml` | runtime |
 | uv | `0.12.19` | every workflow | lock, build, SBOM (CycloneDX 1.5) |
-| inspect-ai | `0.3.283` | `pyproject.toml` (`inspect` extra) | runner |
+| inspect-ai | `0.3.286` | `pyproject.toml` (`inspect` extra) | runner |
 | inspect-swe | `0.2.72` | `pyproject.toml` (`inspect` extra) | Claude Code scaffold |
 | Claude Code | `2.1.287` | `runners/inspect_runner.py` | external subject; the Linux binaries are pinned by sha256 (`CLAUDE_CODE_CHECKSUMS`, in the system identity) |
 | sigstore | `4.5.1` | `pyproject.toml` (`sign` extra) | signing, offline verification trust root |

@@ -1,0 +1,15 @@
+[
+  {
+    "cwe": 862,
+    "locations": [
+      {
+        "file": "portalauth/service.py",
+        "symbol": "finish_logout",
+        "start_line": 30,
+        "end_line": 32,
+        "role": "site"
+      }
+    ],
+    "description": "The logout handler removes any session ID without verifying the caller's authority, allowing an attacker to invalidate arbitrary user sessions (missing authorization)."
+  }
+]

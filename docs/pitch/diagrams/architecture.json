@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Aureproof system architecture",
+    "output": ".archify/architecture-aureproof-20261101-1330/aureproof-architecture.html",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "repository": {
+      "url": "https://github.com/bhargavchintam/aureproof.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "8c99d4f3aed589b1a955a51af8e7d593756cc8df"
+    }
+  },
+  "components": [
+    { "id": "provider", "type": "external", "label": "Model provider", "sublabel": "Anthropic API", "pos": [560, 40], "size": [160, 60],
+      "sources": [ { "path": "src/aureproof/runners/inspect_runner.py", "line": 160, "end_line": 166, "label": "bridge forwards to Inspect model API" } ] },
+    { "id": "cli", "type": "backend", "label": "aureproof CLI", "sublabel": "run, score, compare", "pos": [40, 190], "size": [160, 60],
+      "sources": [ { "path": "src/aureproof/cli/main.py", "line": 339, "end_line": 399, "label": "run" }, { "path": "src/aureproof/cli/main.py", "line": 225, "end_line": 262, "label": "score" } ] },
+    { "id": "orch", "type": "backend", "label": "Slice orchestrator", "sublabel": "attempts, re-dispatch", "pos": [300, 190], "size": [160, 60],
+      "sources": [ { "path": "src/aureproof/runners/slice.py", "line": 86, "end_line": 160, "label": "run_slice" }, { "path": "src/aureproof/runners/orchestrate.py", "line": 37, "end_line": 127, "label": "run_episode" } ] },
+    { "id": "runner", "type": "backend", "label": "Inspect runner", "sublabel": "preflight, capture", "pos": [560, 190], "size": [160, 60],
+      "sources": [ { "path": "src/aureproof/runners/inspect_runner.py", "line": 127, "end_line": 168, "label": "preflight" }, { "path": "src/aureproof/runners/inspect_runner.py", "line": 299, "end_line": 328, "label": "collect findings" } ] },
+    { "id": "sandbox", "type": "frontend", "label": "Claude Code agent", "sublabel": "Docker, network none", "pos": [820, 190], "size": [160, 60], "tag": "untrusted",
+      "sources": [ { "path": "src/aureproof/runners/compose.yaml", "line": 6, "end_line": 14, "label": "network_mode: none" }, { "path": "src/aureproof/runners/inspect_runner.py", "line": 329, "end_line": 357, "label": "subject" } ] },
+    { "id": "registry", "type": "database", "label": "Fixtures and THRs", "sublabel": "task pairs, health", "pos": [40, 360], "size": [160, 60],
+      "sources": [ { "path": "src/aureproof/oracles/calibration.py", "line": 288, "end_line": 329, "label": "calibrate" }, { "path": "src/aureproof/runners/slice.py", "line": 69, "end_line": 81, "label": "refuses unhealthy THR" } ] },
+    { "id": "matcher", "type": "backend", "label": "Label matcher", "sublabel": "verdicts, metrics", "pos": [300, 360], "size": [160, 60],
+      "sources": [ { "path": "src/aureproof/scoring/matcher.py", "line": 115, "end_line": 195, "label": "match" } ] },
+    { "id": "seal", "type": "database", "label": "Evidence bundle", "sublabel": "journal, in-toto seal", "pos": [560, 360], "size": [160, 60],
+      "sources": [ { "path": "src/aureproof/bundle/run.py", "line": 118, "end_line": 190, "label": "seal_run" }, { "path": "src/aureproof/bundle/build.py", "line": 63, "end_line": 83, "label": "hash chain" } ] },
+    { "id": "signwf", "type": "cloud", "label": "sign.yml workflow", "sublabel": "keyless, OIDC", "pos": [820, 360], "size": [160, 60],
+      "sources": [ { "path": ".github/workflows/sign.yml", "line": 29, "end_line": 49 }, { "path": "src/aureproof/signing/sigstore_adapter.py", "line": 24, "end_line": 46, "label": "sign_bytes" } ] },
+    { "id": "sigstore", "type": "external", "label": "Sigstore", "sublabel": "Fulcio, Rekor", "pos": [1080, 360], "size": [160, 60],
+      "sources": [ { "path": "src/aureproof/signing/sigstore_adapter.py", "line": 24, "end_line": 46 } ] },
+    { "id": "gate", "type": "security", "label": "Comparison gate", "sublabel": "pass, fail, inconclusive", "pos": [560, 530], "size": [160, 60],
+      "sources": [ { "path": "src/aureproof/bundle/compare.py", "line": 193, "end_line": 243, "label": "compare" }, { "path": "src/aureproof/stats/decide.py", "line": 31, "end_line": 96, "label": "decide" }, { "path": "action.yml", "line": 44, "end_line": 70, "label": "GitHub Action" } ] },
+    { "id": "verifier", "type": "external", "label": "Anyone, offline", "sublabel": "verify, re-score", "pos": [820, 530], "size": [160, 60],
+      "sources": [ { "path": "src/aureproof/bundle/validate.py", "line": 110, "end_line": 244, "label": "validate V1 to V6" }, { "path": "src/aureproof/bundle/run.py", "line": 199, "end_line": 236, "label": "rescore" }, { "path": "src/aureproof/signing/sigstore_adapter.py", "line": 73, "end_line": 89, "label": "verify_bundle" } ] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Trusted controller", "wraps": ["cli", "orch", "runner", "registry", "matcher", "seal"] },
+    { "kind": "security-group", "label": "Pure core: no network or process I/O", "wraps": ["matcher", "seal"] },
+    { "kind": "security-group", "label": "Untrusted sandbox", "wraps": ["sandbox"] }
+  ],
+  "connections": [
+    { "id": "plan", "from": "cli", "to": "orch", "label": "plan", "variant": "emphasis" },
+    { "id": "attempt", "from": "orch", "to": "runner", "label": "attempt", "variant": "emphasis" },
+    { "id": "dispatch", "from": "runner", "to": "sandbox", "label": "task files", "variant": "security" },
+    { "id": "model", "from": "runner", "to": "provider", "label": "key stays here", "variant": "security" },
+    { "id": "health", "from": "cli", "to": "registry", "label": "check THRs" },
+    { "id": "submit", "from": "orch", "to": "matcher", "label": "submission" },
+    { "id": "verdicts", "from": "matcher", "to": "seal", "label": "verdicts" },
+    { "id": "signseal", "from": "seal", "to": "signwf", "label": "seal" },
+    { "id": "cert", "from": "signwf", "to": "sigstore", "label": "cert, log" },
+    { "id": "signed", "from": "signwf", "to": "verifier", "label": "signed bundle", "variant": "emphasis" },
+    { "id": "decide", "from": "verifier", "to": "gate", "label": "A and B", "variant": "emphasis" }
+  ],
+  "cards": [
+    { "dot": "rose", "title": "Enforced at the sandbox", "items": ["No provider key inside; model calls go through the bridge", "network_mode: none; WebSearch and WebFetch withheld", "Claude Code binary pinned by SHA-256"] },
+    { "dot": "amber", "title": "Fails closed", "items": ["Undeclared tools: infra failure, not graded", "Incomplete evidence seals as incomplete", "The gate refuses incomplete or unlinked bundles"] },
+    { "dot": "slate", "title": "Not shown", "items": ["Every Eval Ever export, adjudication, migrate", "Harbor runner is planned for v0.2"] }
+  ]
+}

@@ -1,0 +1,28 @@
+[
+  {
+    "cwe": 284,
+    "locations": [
+      {
+        "file": "profilehub/service.py",
+        "symbol": "admin_update",
+        "start_line": 23,
+        "end_line": 31,
+        "role": "site"
+      }
+    ],
+    "description": "The admin_update function allows an admin to set the 'role' field to any string without validation. An attacker with admin privileges could assign the 'admin' role to any user, potentially leading to privilege escalation."
+  },
+  {
+    "cwe": 20,
+    "locations": [
+      {
+        "file": "profilehub/service.py",
+        "symbol": "admin_update",
+        "start_line": 23,
+        "end_line": 31,
+        "role": "site"
+      }
+    ],
+    "description": "admin_update applies changes to any ADMIN_EDITABLE field without type checking. Fields like 'is_active' can be set to non‑boolean values, which may cause unexpected behavior elsewhere in the application."
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "cwe": 639,
+    "locations": [
+      {
+        "file": "invoicer/api.py",
+        "symbol": "handle_request",
+        "start_line": 43,
+        "end_line": 47,
+        "role": "source"
+      },
+      {
+        "file": "invoicer/service.py",
+        "symbol": "get_invoice",
+        "start_line": 40,
+        "end_line": 45,
+        "role": "sink"
+      }
+    ],
+    "description": "get_invoice only verifies the user's membership in the client-supplied tenant (X-Tenant header) but fetches the invoice by invoice_id from the global store without checking invoice.tenant_id == tenant_id (unlike void_invoice/share_invoice, which use _in_tenant). Any authenticated user can read another tenant's invoice (customer, amount_cents) by passing their own tenant together with the victim's invoice_id."
+  },
+  {
+    "cwe": 248,
+    "locations": [
+      {
+        "file": "invoicer/api.py",
+        "symbol": "handle_request",
+        "start_line": 26,
+        "end_line": 31,
+        "role": "source"
+      },
+      {
+        "file": "invoicer/service.py",
+        "symbol": "shared_view",
+        "start_line": 60,
+        "end_line": 65,
+        "role": "sink"
+      }
+    ],
+    "description": "The publicly reachable 'shared' action validates the token only as a non-empty string; hmac.compare_digest in shared_view raises an uncaught TypeError when the attacker-supplied token contains non-ASCII characters (once any invoice has a share_token set). An unauthenticated attacker can crash request handling at will, causing denial of service."
+  }
+]

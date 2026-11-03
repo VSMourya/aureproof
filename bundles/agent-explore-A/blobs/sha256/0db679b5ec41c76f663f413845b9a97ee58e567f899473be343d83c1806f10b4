@@ -1,0 +1,29 @@
+[
+  {
+    "cwe": 915,
+    "locations": [
+      {
+        "file": "profilehub/api.py",
+        "symbol": "handle_request",
+        "start_line": 22,
+        "end_line": 22,
+        "role": "source"
+      },
+      {
+        "file": "profilehub/api.py",
+        "symbol": "handle_request",
+        "start_line": 30,
+        "end_line": 30,
+        "role": "site"
+      },
+      {
+        "file": "profilehub/service.py",
+        "symbol": "update_profile",
+        "start_line": 28,
+        "end_line": 30,
+        "role": "sink"
+      }
+    ],
+    "description": "update_profile performs mass assignment: it applies every client-supplied change for which hasattr(user, key) is true, instead of restricting keys to the defined but unused SELF_EDITABLE allowlist. A member can send changes {\"role\": \"admin\"} on their own profile to escalate to administrator and then use the admin action to modify or deactivate any member; they can also reactivate themselves ({\"is_active\": true}) or rewrite their own username to desync the store key and edit another member's record under the victim's name."
+  }
+]

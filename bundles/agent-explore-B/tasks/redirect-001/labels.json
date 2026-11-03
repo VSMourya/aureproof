@@ -1,0 +1,88 @@
+{
+  "schema": "aureproof.labels/v0.1",
+  "task_id": "redirect-001",
+  "task_revision": "0.1.0-draft",
+  "cluster_id": "redirect-001",
+  "canary": "d2e2540e-b03d-4a96-9d23-26103a7652f5",
+  "oracle_canary": "e9ea2d2e-bac2-4d98-8f6c-16d7f7c8fe94",
+  "defects": [
+    {
+      "defect_id": "redirect-001-d1",
+      "variants": [
+        "vulnerable"
+      ],
+      "summary": "finish_login keeps next_url whenever it starts with '/', so a protocol-relative value such as //other.example/sign-in passes, and handle_request answers the sign-in with a redirect to another host. finish_logout uses is_local_path, which rejects '//' and backslashes.",
+      "accepted_cwes": [
+        20,
+        601
+      ],
+      "anchors": [
+        {
+          "file": "portalauth/service.py",
+          "symbol": "finish_login",
+          "line_range": [
+            23,
+            27
+          ],
+          "role": "site"
+        },
+        {
+          "file": "portalauth/api.py",
+          "symbol": "handle_request",
+          "line_range": [
+            14,
+            38
+          ],
+          "role": "source"
+        }
+      ],
+      "calibration_poc": "calibration_poc.py"
+    }
+  ],
+  "focal_negative": {
+    "variant": "repaired",
+    "anchors": [
+      {
+        "file": "portalauth/service.py",
+        "symbol": "finish_login",
+        "line_range": [
+          23,
+          27
+        ],
+        "role": "site"
+      },
+      {
+        "file": "portalauth/api.py",
+        "symbol": "handle_request",
+        "line_range": [
+          14,
+          38
+        ],
+        "role": "source"
+      }
+    ]
+  },
+  "reviewed_negative_scope": [
+    {
+      "file": "portalauth/service.py",
+      "symbol": "finish_logout",
+      "note": "decoy: the same redirect, checked with is_local_path"
+    },
+    {
+      "file": "portalauth/service.py",
+      "symbol": "help_link",
+      "note": "decoy: the caller picks a key of the fixed HELP_PAGES map"
+    },
+    {
+      "file": "portalauth/service.py",
+      "symbol": "partner_link",
+      "note": "decoy: sends the browser off-site on purpose, but only to the fixed PARTNER_SITES map"
+    },
+    {
+      "file": "portalauth/urls.py"
+    },
+    {
+      "file": "portalauth/sessions.py"
+    }
+  ]
+}
