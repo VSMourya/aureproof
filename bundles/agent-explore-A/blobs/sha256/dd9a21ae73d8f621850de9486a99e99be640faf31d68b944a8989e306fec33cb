@@ -1,0 +1,56 @@
+[
+  {
+    "cwe": 248,
+    "locations": [
+      {
+        "file": "linkpreview/net.py",
+        "symbol": "check_url",
+        "start_line": 41,
+        "end_line": 46,
+        "role": "site"
+      },
+      {
+        "file": "linkpreview/net.py",
+        "symbol": "next_location",
+        "start_line": 49,
+        "end_line": 54,
+        "role": "site"
+      },
+      {
+        "file": "linkpreview/api.py",
+        "symbol": "handle_request",
+        "start_line": 21,
+        "end_line": 35,
+        "role": "site"
+      }
+    ],
+    "description": "check_url calls urlsplit() (and next_location calls urljoin()) on user-controlled URLs without guarding against ValueError: a target or redirect Location such as 'https://[bad' raises 'Invalid IPv6 URL'. handle_request only catches Blocked (a ValueError subclass), KeyError, NotFound and TooManyRedirects, so the bare ValueError escapes the handler; any chat user can crash preview/icon requests at will instead of receiving a controlled 4xx error response."
+  },
+  {
+    "cwe": 918,
+    "locations": [
+      {
+        "file": "linkpreview/api.py",
+        "symbol": "handle_request",
+        "start_line": 17,
+        "end_line": 18,
+        "role": "source"
+      },
+      {
+        "file": "linkpreview/net.py",
+        "symbol": "check_url",
+        "start_line": 41,
+        "end_line": 46,
+        "role": "site"
+      },
+      {
+        "file": "linkpreview/service.py",
+        "symbol": "fetch_preview",
+        "start_line": 88,
+        "end_line": 94,
+        "role": "sink"
+      }
+    ],
+    "description": "check_url validates only the scheme and hostname but never the port, so URLs like 'http://news.example:6379/' or 'https://cdn.example:8080/admin' pass the allowlist and are fetched, with the (64KB-truncated) response body returned to the requester. Because the allow-listed hosts are the app's own infrastructure, any chat user can use preview/icon fetches (and their redirect chains) to reach and read non-web/internal services listening on arbitrary ports of those hosts."
+  }
+]

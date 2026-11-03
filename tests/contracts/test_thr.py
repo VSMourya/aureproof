@@ -174,3 +174,39 @@ def test_post_freeze_health_findings_are_exploratory_only() -> None:
         protocol_frozen_at=FREEZE,
     )
     assert task in part.graded and task in part.exploratory and not part.excluded
+
+
+@pytest.mark.parametrize(
+    ("frozen_at", "protocol_frozen_at", "pre_registered"),
+    [
+        # Half a second after the freeze: '.' sorts before 'Z', so string order says before.
+        ("2026-10-31T00:00:00.5Z", "2026-10-31T00:00:00Z", False),
+        ("2026-10-31T00:00:00.15Z", "2026-10-31T00:00:00.1Z", False),
+        ("2026-10-31T00:00:00Z", "2026-10-31T00:00:00.5Z", True),
+        ("2026-10-31T00:00:00.1Z", "2026-10-31T00:00:00.15Z", True),
+        # The same instant written with different precision is not after the freeze.
+        ("2026-10-31T00:00:00.500Z", "2026-10-31T00:00:00.5Z", True),
+        ("2026-10-31T00:00:00.5Z", "2026-10-31T00:00:00.500000000Z", True),
+    ],
+)
+def test_pre_registration_compares_instants_not_strings(
+    frozen_at: str, protocol_frozen_at: str, pre_registered: bool
+) -> None:
+    task = "sha256:" + "4" * 64
+    part = partition_by_health(
+        {task: [_episode([])]},
+        [_record(task, "unhealthy", frozen_at)],
+        protocol_frozen_at=protocol_frozen_at,
+    )
+    assert (task in part.excluded) is pre_registered
+    assert (task in part.exploratory) is not pre_registered
+
+
+def test_a_malformed_protocol_freeze_time_is_refused() -> None:
+    task = "sha256:" + "4" * 64
+    with pytest.raises(ValueError, match="RFC 3339"):
+        partition_by_health(
+            {task: [_episode([])]},
+            [_record(task, "unhealthy", "2026-10-30T00:00:00Z")],
+            protocol_frozen_at="2026-10-31 00:00:00",
+        )

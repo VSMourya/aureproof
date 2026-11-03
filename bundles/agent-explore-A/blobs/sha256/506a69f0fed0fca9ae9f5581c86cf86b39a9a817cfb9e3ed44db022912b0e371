@@ -1,0 +1,29 @@
+[
+  {
+    "cwe": 862,
+    "locations": [
+      {
+        "file": "docstore/api.py",
+        "symbol": "handle_request",
+        "start_line": 31,
+        "end_line": 33,
+        "role": "source"
+      },
+      {
+        "file": "docstore/service.py",
+        "symbol": "delete_document",
+        "start_line": 98,
+        "end_line": 101,
+        "role": "site"
+      },
+      {
+        "file": "docstore/service.py",
+        "symbol": "DocumentStore.remove",
+        "start_line": 72,
+        "end_line": 73,
+        "role": "sink"
+      }
+    ],
+    "description": "delete_document removes a document without any authorization check (unlike read_document/update_document which enforce can_read/can_modify). The 'delete' action in handle_request invokes it with an attacker-supplied doc_id, so any user (non-owner, non-admin) can delete any document in the store, including other users' private documents (IDOR / arbitrary document destruction)."
+  }
+]

@@ -1,0 +1,15 @@
+[
+  {
+    "cwe": 862,
+    "locations": [
+      {
+        "file": "docstore/service.py",
+        "symbol": "delete_document",
+        "start_line": 60,
+        "end_line": 63,
+        "role": "site"
+      }
+    ],
+    "description": "delete_document removes a document using only the caller-supplied doc_id and never performs any authorization check (unlike read_document/update_document, which call can_read/can_modify). Any user reaching the API's 'delete' action can therefore delete any document, regardless of ownership, sharing, or admin status."
+  }
+]

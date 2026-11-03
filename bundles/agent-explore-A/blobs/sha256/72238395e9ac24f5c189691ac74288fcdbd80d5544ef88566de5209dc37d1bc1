@@ -1,0 +1,29 @@
+[
+  {
+    "cwe": 22,
+    "locations": [
+      {
+        "file": "reportvault/api.py",
+        "symbol": "handle_request",
+        "start_line": 23,
+        "end_line": 23,
+        "role": "source"
+      },
+      {
+        "file": "reportvault/service.py",
+        "symbol": "download_attachment",
+        "start_line": 29,
+        "end_line": 31,
+        "role": "site"
+      },
+      {
+        "file": "reportvault/service.py",
+        "symbol": "download_attachment",
+        "start_line": 32,
+        "end_line": 32,
+        "role": "sink"
+      }
+    ],
+    "description": "download_attachment validates the raw percent-encoded name with is_plain_name but builds the filesystem path from the percent-decoded name without safe_join. A request such as name=%2e%2e%2f%2e%2e%2fsecret.txt (no literal '/' and not starting with '.', so it passes validation) decodes to ../../secret.txt and escapes vault.attachments; an encoded absolute path like %2fetc%2fpasswd also works, giving arbitrary file read."
+  }
+]

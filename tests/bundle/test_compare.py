@@ -9,11 +9,14 @@ import itertools
 import json
 from fractions import Fraction
 from pathlib import Path
+from types import ModuleType
 
 import pytest
 
 from aureproof.bundle.compare import GateError, compare
 from aureproof.contracts.decision import DecisionProtocol
+from aureproof.contracts.thr import TaskHealthRecord
+from aureproof.scoring import scoring_identity
 from aureproof.storage import read_bundle
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -112,17 +115,90 @@ def test_a_thr_other_than_the_one_registered_fails_closed() -> None:
         compare(protocol, a, edited)
 
 
-def test_examples_are_committed_exactly_as_generated() -> None:
+def _generator() -> ModuleType:
     spec = importlib.util.spec_from_file_location("gate", ROOT / "scripts/make_gate_examples.py")
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
+    return module
+
+
+def test_a_thr_proven_under_other_scoring_semantics_fails_closed() -> None:
+    # The protocol names this THR's digest, so every other check passes: only the
+    # scoring identity the controls ran under differs from the one that graded the run.
+    gate = _generator()
+    other = "sha256:" + "0" * 64
+    thrs = {t: gate._thr(t) for t in gate.TASKS}
+    thrs["s1"] = thrs["s1"].model_copy(update={"scoring_identity": other})
+    protocol = gate._protocol("pass", thrs)
+    a, b = (gate._bundle(side, protocol, thrs, gate.SCENARIOS["pass"]) for side in ("A", "B"))
+    with pytest.raises(GateError) as err:
+        compare(protocol, a, b)
+    graded = scoring_identity()
+    assert err.value.problems == [
+        f"{side}: s1: THR controls ran under scoring identity {other}, "
+        f"but the run was scored under {graded}"
+        for side in ("A", "B")
+    ]
+
+
+@pytest.mark.parametrize(
+    ("vector", "status"),
+    [("unhealthy-spray-rewarded", "unhealthy"), ("unknown-missing-nop", "unknown")],
+)
+def test_a_protocol_pinning_a_thr_that_is_not_healthy_fails_closed(
+    vector: str, status: str
+) -> None:
+    # The gate re-checks health offline instead of trusting the producer's runner. The
+    # protocol names the record's digest and its scoring identity is the run's, so only
+    # the health check can fire.
+    gate = _generator()
+    thrs = {t: gate._thr(t) for t in gate.TASKS}
+    data = gate._instance(f"conformance/thr/v0.1/valid/{vector}.json")
+    data["task"] = thrs["s1"].task.model_dump(mode="json")
+    data["scoring_identity"] = thrs["s1"].scoring_identity
+    thrs["s1"] = TaskHealthRecord.model_validate(data)
+    assert thrs["s1"].status.value == status
+    protocol = gate._protocol("pass", thrs)
+    a, b = (gate._bundle(side, protocol, thrs, gate.SCENARIOS["pass"]) for side in ("A", "B"))
+    with pytest.raises(GateError) as err:
+        compare(protocol, a, b)
+    assert err.value.problems == [f"{side}: s1: the THR is {status}, not healthy" for side in "AB"]
+
+
+def test_a_seal_without_a_readable_scoring_profile_fails_closed() -> None:
+    protocol, a, b = _example("pass")
+    seal = json.loads(b["seal.intoto.json"])
+    del seal["predicate"]["versions"]["scoring_profile"]
+    unnamed = dict(b, **{"seal.intoto.json": json.dumps(seal).encode()})
+    with pytest.raises(GateError) as err:
+        compare(protocol, a, unnamed)
+    assert "B: the seal names no readable scoring profile" in err.value.problems
+
+
+def test_a_seal_naming_another_scoring_profile_than_its_episodes_fails_closed() -> None:
+    protocol, a, b = _example("pass")
+    seal = json.loads(b["seal.intoto.json"])
+    claimed = "sha256:" + "0" * 64
+    seal["predicate"]["versions"]["scoring_profile"] = claimed
+    relabelled = dict(b, **{"seal.intoto.json": json.dumps(seal).encode()})
+    with pytest.raises(GateError) as err:
+        compare(protocol, a, relabelled)
+    problems = err.value.problems
+    assert (
+        f"B: the seal names scoring profile {claimed}, but episodes were scored under "
+        f"{scoring_identity()}" in problems
+    )
+    assert any(p.startswith("B: s1: THR controls ran under scoring identity") for p in problems)
+
+
+def test_examples_are_committed_exactly_as_generated() -> None:
     on_disk = {
         p.relative_to(EXAMPLES).as_posix(): p.read_bytes()
         for p in EXAMPLES.rglob("*")
         if p.is_file()
     }
-    assert module.build() == on_disk
+    assert _generator().build() == on_disk
 
 
 # ---- CLI -----------------------------------------------------------------------------
@@ -180,3 +256,37 @@ def test_compare_cli_requires_signatures_when_asked() -> None:
     )
     assert result.exit_code == 2  # type: ignore[attr-defined]
     assert "not signed" in result.output  # type: ignore[attr-defined]
+
+
+@pytest.mark.parametrize("name", OUTCOMES)
+def test_cluster_rows_carry_the_recall_the_metric_reports(name: str) -> None:
+    """The guardrail's per-cluster support adds up to each side's known-defect recall."""
+    result = compare(*_example(name))
+    rows = result.decision.cluster_table
+    for side, summary in (("a", result.a), ("b", result.b)):
+        credited = sum(getattr(r, f"{side}_credited") for r in rows)
+        present = sum(getattr(r, f"{side}_positives") for r in rows)
+        assert f"{credited}/{present}" == summary.metrics["known_defect_recall"]
+        assert present > 0
+
+
+def test_the_report_lists_each_guardrail() -> None:
+    import dataclasses
+
+    from aureproof.cli.report import render_comparison
+    from aureproof.contracts.decision import GuardrailResult, Interval
+
+    result = compare(*_example("pass"))
+    guard = GuardrailResult(
+        metric="known_defect_recall",
+        margin=0.1,
+        outcome="fail",
+        reason="CI upper bound -2/3 < -margin -1/10",
+        clusters=8,
+        mean_difference="-2/3",
+        ci=Interval(lower=-2 / 3, upper=-2 / 3),
+    )
+    decision = result.decision.model_copy(update={"guardrails": [guard]})
+    text = render_comparison(dataclasses.replace(result, decision=decision))
+    assert "Guardrail known_defect_recall (margin 0.1): fail; mean difference -2/3" in text
+    assert "Guardrail" not in render_comparison(result)

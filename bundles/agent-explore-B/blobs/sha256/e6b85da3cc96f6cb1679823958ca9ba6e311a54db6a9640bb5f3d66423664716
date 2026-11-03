@@ -1,0 +1,15 @@
+[
+  {
+    "cwe": 862,
+    "locations": [
+      {
+        "file": "docstore/service.py",
+        "symbol": "delete_document",
+        "start_line": 60,
+        "end_line": 63,
+        "role": "site"
+      }
+    ],
+    "description": "delete_document does not verify the actor's permission before removing a document, so any authenticated user can delete arbitrary documents regardless of ownership or admin rights."
+  }
+]

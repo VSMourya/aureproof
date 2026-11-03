@@ -1,0 +1,15 @@
+[
+  {
+    "cwe": 284,
+    "locations": [
+      {
+        "file": "invoicer/service.py",
+        "symbol": "get_invoice",
+        "start_line": 40,
+        "end_line": 45,
+        "role": "site"
+      }
+    ],
+    "description": "The get_invoice function checks that the user is a member of the specified tenant but fails to verify that the invoice belongs to that tenant. This allows a user from one tenant to retrieve invoices from another tenant by guessing an invoice_id, resulting in an IDOR (Improper Access Control)."
+  }
+]

@@ -1,0 +1,29 @@
+[
+  {
+    "cwe": 22,
+    "locations": [
+      {
+        "file": "reportvault/api.py",
+        "symbol": "handle_request",
+        "start_line": 23,
+        "end_line": 23,
+        "role": "source"
+      },
+      {
+        "file": "reportvault/service.py",
+        "symbol": "download_attachment",
+        "start_line": 29,
+        "end_line": 29,
+        "role": "site"
+      },
+      {
+        "file": "reportvault/service.py",
+        "symbol": "download_attachment",
+        "start_line": 31,
+        "end_line": 32,
+        "role": "sink"
+      }
+    ],
+    "description": "download_attachment validates the raw, still percent-encoded name with is_plain_name() but then percent-decodes it and joins it to vault.attachments without safe_join(). Encoded traversal such as %2e%2e%2f (../) or %2fetc%2fhostname (absolute path) bypasses the check, so a download request reads arbitrary files outside the attachments directory (reports, templates, or any file on disk) and the handler returns their contents with status 200."
+  }
+]

@@ -226,6 +226,11 @@ def render_comparison(comparison: Any) -> str:
         f"- Wilson intervals, clusters as the independent units: "
         f"A [{d.wilson_a.lower}, {d.wilson_a.upper}], B [{d.wilson_b.lower}, {d.wilson_b.upper}].",
     ]
+    for g in d.guardrails:
+        lines.append(
+            f"- Guardrail {g.metric} (margin {g.margin}): {g.outcome}; mean difference "
+            f"{g.mean_difference} over {g.clusters} clusters; CI [{g.ci.lower}, {g.ci.upper}]."
+        )
     if d.provisional_outcome != d.outcome:
         lines.append(f"- Provisional outcome {d.provisional_outcome}, not final: {d.reason}.")
     lines += [

@@ -1,0 +1,15 @@
+[
+  {
+    "cwe": 915,
+    "locations": [
+      {
+        "file": "profilehub/service.py",
+        "symbol": "update_profile",
+        "start_line": 22,
+        "end_line": 31,
+        "role": "site"
+      }
+    ],
+    "description": "The self-service profile update copies caller-supplied keys onto the User object via hasattr()/setattr() instead of enforcing the defined-but-unused SELF_EDITABLE whitelist, so any member can mass-assign protected attributes on their own record: setting role=\"admin\" grants full administrative control over every member, and setting is_active=true silently reverses deactivation. It also permits changing username to another member's name, after which the self-edit check (actor.username != username) matches the victim and the attacker can arbitrarily rewrite that victim's profile (bio, email, role)."
+  }
+]

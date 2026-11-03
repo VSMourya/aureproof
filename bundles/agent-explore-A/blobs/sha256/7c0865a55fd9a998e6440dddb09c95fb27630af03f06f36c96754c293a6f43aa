@@ -1,0 +1,49 @@
+[
+  {
+    "cwe": 22,
+    "locations": [
+      {
+        "file": "reportvault/service.py",
+        "symbol": "read_report",
+        "start_line": 40,
+        "end_line": 41,
+        "role": "site"
+      }
+    ],
+    "description": "read_report is the only name-taking operation that skips the is_plain_name() policy enforced for attachments, so the 'report' action accepts names addressing hidden dotfiles and nested subdirectories inside the reports store (verified: name '.draft-secret' and 'sub/../.draft-secret' return file contents). safe_join still confines the path to the reports directory, but the flat-namespace policy that the rest of the service applies to user-supplied names is bypassed here."
+  },
+  {
+    "cwe": 248,
+    "locations": [
+      {
+        "file": "reportvault/api.py",
+        "symbol": "handle_request",
+        "start_line": 41,
+        "end_line": 44,
+        "role": "site"
+      },
+      {
+        "file": "reportvault/service.py",
+        "symbol": "read_report",
+        "start_line": 40,
+        "end_line": 41,
+        "role": "sink"
+      },
+      {
+        "file": "reportvault/service.py",
+        "symbol": "upload_attachment",
+        "start_line": 24,
+        "end_line": 24,
+        "role": "sink"
+      },
+      {
+        "file": "reportvault/service.py",
+        "symbol": "download_attachment",
+        "start_line": 32,
+        "end_line": 33,
+        "role": "sink"
+      }
+    ],
+    "description": "handle_request only converts BadName/OutsideVault/KeyError and FileNotFoundError/IsADirectoryError/NotADirectoryError into status codes; other attacker-triggered errors propagate uncaught and crash request handling. Verified: a report name containing an encoded NUL (\"q3%00.pdf\") raises ValueError (lstat: embedded null character) out of safe_join, and any name longer than the filesystem's 255-byte limit raises ENAMETOOLONG OSError on upload (write_bytes), download, or report (read_bytes), giving a remote caller a repeatable denial of service."
+  }
+]

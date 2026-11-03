@@ -51,7 +51,13 @@ def test_vectors_cover_pass_fail_inconclusive_tie_zero_and_adjudication() -> Non
     outcomes = {c["expected"]["outcome"] for c in VECTORS["cases"]}
     assert outcomes == {"pass", "fail", "inconclusive"}
     titles = " ".join(c["title"] for c in VECTORS["cases"]).lower()
-    for word in ("zero difference", "exactly at -margin", "five clusters", "unadjudicated"):
+    for word in (
+        "zero difference",
+        "exactly at -margin",
+        "five clusters",
+        "unadjudicated",
+        "vacuous",
+    ):
         assert word in titles
 
 
@@ -166,3 +172,155 @@ def test_the_margin_is_the_decimal_the_protocol_wrote() -> None:
     assert decision.mean_difference == "-1/20"
     assert decision.outcome == "inconclusive", decision.reason
     assert "-1/20" in decision.reason and "72057594037927936" not in decision.reason
+
+
+@pytest.mark.parametrize("case", VECTORS["guardrail_cases"], ids=lambda c: c["id"])
+def test_guardrail_vector(case: dict[str, Any]) -> None:
+    protocol = DecisionProtocol.model_validate(case["protocol"])
+    decision = decide(protocol, [ClusterRow.model_validate(r) for r in case["rows"]])
+    exp = case["expected"]
+    assert decision.outcome == exp["outcome"], decision.reason
+    assert decision.provisional_outcome == exp["provisional_outcome"]
+    assert _frac(decision.mean_difference) == _frac(exp["mean_difference"])
+    assert len(decision.guardrails) == len(exp["guardrails"])
+    for got, want in zip(decision.guardrails, exp["guardrails"], strict=True):
+        assert got.metric == want["metric"]
+        assert got.outcome == want["outcome"], got.reason
+        assert got.clusters == want["clusters"]
+        assert _frac(got.mean_difference) == _frac(want["mean_difference"])
+        assert got.ci.lower == pytest.approx(float(Fraction(want["lower"])), abs=0, rel=1e-15)
+        assert got.ci.upper == pytest.approx(float(Fraction(want["upper"])), abs=0, rel=1e-15)
+        assert f"guardrail {got.metric} {got.outcome}" in decision.reason
+
+
+def test_guardrail_vectors_close_both_restraint_games() -> None:
+    titles = " ".join(c["title"] for c in VECTORS["guardrail_cases"]).lower()
+    for word in ("withholding", "selective silence", "unadjudicated"):
+        assert word in titles
+    outcomes = {c["expected"]["outcome"] for c in VECTORS["guardrail_cases"]}
+    assert outcomes == {"pass", "fail", "inconclusive"}
+
+
+def test_without_the_guardrail_withholding_and_silence_pass() -> None:
+    """The games G-01 and G-02 close: the same rows pass when no guardrail is registered."""
+    for case_id in ("G-01", "G-02"):
+        case = next(c for c in VECTORS["guardrail_cases"] if c["id"] == case_id)
+        protocol = DecisionProtocol.model_validate({**case["protocol"], "guardrails": []})
+        rows = [ClusterRow.model_validate(r) for r in case["rows"]]
+        assert decide(protocol, rows).outcome == "pass"
+
+
+def test_a_protocol_without_guardrails_keeps_its_signed_identity() -> None:
+    """Registered before guardrails existed; the sealed episodes name this identity."""
+    path = ROOT / "protocols/m2-slice-2/protocol.json"
+    protocol = DecisionProtocol.model_validate_json(path.read_bytes())
+    assert protocol.identity == (
+        "sha256:368664cb3802192b43d54b8e61899ca75ddca3b7c2413351f51a54ad69e7c382"
+    )
+    assert "guardrails" not in protocol.model_dump(mode="json")
+    guarded = DecisionProtocol.model_validate(
+        {
+            **protocol.model_dump(mode="json"),
+            "guardrails": [{"metric": "known_defect_recall", "margin": 0.1}],
+        }
+    )
+    assert guarded.model_dump(mode="json")["guardrails"] == [
+        {"metric": "known_defect_recall", "margin": 0.1}
+    ]
+    assert guarded.identity != protocol.identity
+
+
+def test_credited_defects_cannot_exceed_the_defects_present() -> None:
+    with pytest.raises(ValidationError, match="credited"):
+        ClusterRow(
+            cluster_id="c1",
+            a_confirmed=1,
+            a_submitted=1,
+            b_confirmed=1,
+            b_submitted=1,
+            difference=None,
+            a_credited=2,
+            a_positives=1,
+        )
+
+
+def _protocol(k: int, margin: float) -> DecisionProtocol:
+    return DecisionProtocol.model_validate(
+        {
+            "protocol_version": "0.1",
+            "name": "vacuity",
+            "cohort": [
+                {
+                    "task_identity": "sha256:" + format(i, "064x"),
+                    "thr_digest": "sha256:" + "a" * 64,
+                    "cluster_id": f"c{i}",
+                }
+                for i in range(k)
+            ],
+            "configurations": {"A": "sha256:" + "1" * 64, "B": "sha256:" + "2" * 64},
+            "repetitions": 1,
+            "margin": margin,
+        }
+    )
+
+
+def _counts(most_confirmed: int) -> st.SearchStrategy[tuple[int, int]]:
+    """(confirmed, submitted) with confirmed <= submitted <= 6."""
+    return st.tuples(st.integers(0, most_confirmed), st.integers(0, 6)).map(
+        lambda t: (min(t), max(t))
+    )
+
+
+@settings(max_examples=200, deadline=None)
+@given(
+    # A weak baseline (at most one confirmed finding per cluster) makes certain passes common.
+    st.lists(st.tuples(_counts(1), _counts(6)), min_size=6, max_size=8),
+    st.sampled_from([0.0, 0.05, 0.25]),
+)
+def test_a_pass_is_never_certain_before_b_is_seen(
+    clusters: list[tuple[tuple[int, int], tuple[int, int]]], margin: float
+) -> None:
+    """A pass stands only if B with yield 0 in every cluster would not also have passed.
+
+    Every subset mean, and so the interval's lower bound, rises with each cluster
+    difference, so B = 0 everywhere is the worst case for B on the same clusters.
+    """
+    protocol = _protocol(len(clusters), margin)
+    rows = [
+        ClusterRow(
+            cluster_id=f"c{i}",
+            a_confirmed=ac,
+            a_submitted=an,
+            b_confirmed=bc,
+            b_submitted=bn,
+            difference=None,
+        )
+        for i, ((ac, an), (bc, bn)) in enumerate(clusters)
+    ]
+    worst = [r.model_copy(update={"b_confirmed": 0}) for r in rows]
+    decision, worst_case = decide(protocol, rows), decide(protocol, worst)
+    certain = worst_case.provisional_outcome == "pass"
+    if decision.provisional_outcome == "pass":
+        assert decision.outcome == ("inconclusive" if certain else "pass"), decision.reason
+    if certain:
+        assert decision.outcome != "pass"
+        assert decision.provisional_outcome == "pass"
+        assert "could have failed" in decision.reason
+
+
+def test_a_silent_cohort_never_passes_the_gate() -> None:
+    """Both configurations submitting nothing anywhere, as a broken runner would."""
+    rows = [
+        ClusterRow(
+            cluster_id=f"c{i}",
+            a_confirmed=0,
+            a_submitted=0,
+            b_confirmed=0,
+            b_submitted=0,
+            difference=None,
+        )
+        for i in range(12)
+    ]
+    decision = decide(_protocol(12, 0.05), rows)
+    assert decision.outcome == "inconclusive"
+    assert decision.provisional_outcome == "pass"

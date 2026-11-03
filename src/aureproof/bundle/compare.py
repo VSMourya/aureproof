@@ -5,8 +5,10 @@
 Pure: files in, a decision out. Each bundle must belong to the protocol, or the
 comparison fails closed with every problem listed: the sealed protocol is the
 same document, the sealed system is configuration A (or B), every cohort task
-has the THR the protocol names by digest, every task and variant has exactly the
-protocol's repetitions and nothing else, every planned episode names this
+has the THR the protocol names by digest, that THR is healthy and its controls
+ran under the scoring identity that graded the run (the seal's ``scoring_profile``,
+which every re-scored episode must carry), every task and variant has exactly
+the protocol's repetitions and nothing else, every planned episode names this
 protocol and system, and the bundle re-scores byte for byte. Only then are the
 re-scored episodes grouped by cluster, one ``ClusterRow`` each, and passed to
 the exact three-way gate (``stats.decide``). Quality (strict confirmed yield)
@@ -36,7 +38,7 @@ from aureproof.contracts import SystemSpec
 from aureproof.contracts.adjudication import Adjudication
 from aureproof.contracts.decision import ClusterRow, Decision, DecisionProtocol
 from aureproof.contracts.strict_json import JsonInputError, loads_strict
-from aureproof.contracts.thr import TaskHealthRecord, thr_digest
+from aureproof.contracts.thr import HealthStatus, TaskHealthRecord, thr_digest
 from aureproof.scoring import compute_metrics
 from aureproof.scoring.adjudication import adjusted, check, queue, resolve
 from aureproof.scoring.episode import EpisodeScore
@@ -76,6 +78,16 @@ def _load(files: Mapping[str, bytes], path: str) -> object:
     return loads_strict(files[path], i_json=True)
 
 
+def _scoring_profile(files: Mapping[str, bytes]) -> str | None:
+    """The scoring identity the seal says graded the run, or None when unreadable."""
+    try:
+        profile = loads_strict(files[SEAL], i_json=True)["predicate"]["versions"]
+        profile = profile["scoring_profile"]
+    except (KeyError, TypeError, JsonInputError):
+        return None
+    return profile if isinstance(profile, str) else None
+
+
 def _check(
     side: Side, protocol: DecisionProtocol, files: Mapping[str, bytes]
 ) -> tuple[list[str], dict[str, str], list[tuple[str, str, EpisodeScore]]]:
@@ -94,6 +106,10 @@ def _check(
             problems.append(f"{side}: system {system.identity} is not configuration {side}")
     except (KeyError, JsonInputError, ValidationError) as exc:
         problems.append(f"{side}: no readable {SYSTEM}: {type(exc).__name__}")
+
+    profile = _scoring_profile(files)
+    if profile is None:
+        problems.append(f"{side}: the seal names no readable scoring profile")
 
     clusters: dict[str, str] = {}
     for cohort_task in protocol.cohort:
@@ -115,6 +131,17 @@ def _check(
                 f"{side}: {found.task.task_id}: THR is not at {thr_path(found.task.task_id)}"
             )
         else:
+            # Re-checked offline: the gate does not trust the producer's runner (slice.plan).
+            if found.status is not HealthStatus.HEALTHY:
+                problems.append(
+                    f"{side}: {found.task.task_id}: the THR is {found.status.value}, not healthy"
+                )
+            # The THR vouches for the grader its controls ran under, not for any grader.
+            if profile is not None and found.scoring_identity != profile:
+                problems.append(
+                    f"{side}: {found.task.task_id}: THR controls ran under scoring identity "
+                    f"{found.scoring_identity}, but the run was scored under {profile}"
+                )
             clusters[found.task.task_id] = cohort_task.cluster_id
 
     try:
@@ -152,6 +179,12 @@ def _check(
     redo = rescore(files)
     if redo.status != "reproduced":
         problems.append(f"{side}: offline re-score {redo.status}: {'; '.join(redo.problems)}")
+    graded_by = sorted({score.scoring_identity for _, score in redo.scored} - {profile})
+    if profile is not None and graded_by:
+        problems.append(
+            f"{side}: the seal names scoring profile {profile}, but episodes were scored "
+            f"under {', '.join(graded_by)}"
+        )
     pairs = [(ep.task_id, ep.episode_id, score) for ep, score in redo.scored]
     return problems, clusters, pairs
 
@@ -190,6 +223,16 @@ def _adjudicated(
     return problems, totals
 
 
+def _recall(pairs: list[tuple[str, str, EpisodeScore]]) -> dict[str, tuple[int, int]]:
+    """Per task (defects credited, defects present) over graded episodes, as the metric."""
+    totals: dict[str, tuple[int, int]] = {}
+    for task_id, _, score in pairs:
+        if score.graded:
+            credited, present = totals.get(task_id, (0, 0))
+            totals[task_id] = (credited + len(score.credited), present + score.positives)
+    return totals
+
+
 def compare(
     protocol: DecisionProtocol,
     files_a: Mapping[str, bytes],
@@ -216,12 +259,15 @@ def compare(
         raise GateError(problems)
 
     rows = []
+    recall_a, recall_b = _recall(pairs_a), _recall(pairs_b)
     cluster_tasks: dict[str, list[str]] = {}
     for task_id, cluster in clusters_a.items():
         cluster_tasks.setdefault(cluster, []).append(task_id)
     for cluster, tasks in sorted(cluster_tasks.items()):
         a = [sum(totals_a.get(t, (0, 0, 0))[i] for t in tasks) for i in range(3)]
         b = [sum(totals_b.get(t, (0, 0, 0))[i] for t in tasks) for i in range(3)]
+        ra = [sum(recall_a.get(t, (0, 0))[i] for t in tasks) for i in range(2)]
+        rb = [sum(recall_b.get(t, (0, 0))[i] for t in tasks) for i in range(2)]
         rows.append(
             ClusterRow(
                 cluster_id=cluster,
@@ -232,6 +278,10 @@ def compare(
                 a_unresolved=a[1],
                 b_unresolved=b[1],
                 difference=None,
+                a_credited=ra[0],
+                a_positives=ra[1],
+                b_credited=rb[0],
+                b_positives=rb[1],
             )
         )
     return Comparison(

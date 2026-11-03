@@ -1,0 +1,49 @@
+[
+  {
+    "cwe": 117,
+    "locations": [
+      {
+        "file": "docstore/api.py",
+        "symbol": "handle_request",
+        "start_line": 17,
+        "end_line": 20,
+        "role": "source"
+      },
+      {
+        "file": "docstore/service.py",
+        "symbol": "update_document",
+        "start_line": 56,
+        "end_line": 56,
+        "role": "sink"
+      },
+      {
+        "file": "docstore/service.py",
+        "symbol": "delete_document",
+        "start_line": 65,
+        "end_line": 65,
+        "role": "sink"
+      },
+      {
+        "file": "docstore/service.py",
+        "symbol": "purge_all",
+        "start_line": 72,
+        "end_line": 72,
+        "role": "sink"
+      }
+    ],
+    "description": "Attacker-controlled strings (doc_id from the request, accepted with only a non-empty check, and actor.user_id) are interpolated into audit-log records without sanitization. An unprivileged user can embed a newline in a doc_id they own (verified via the update action) so the audit trail records a forged extra entry such as 'root purged 99999 documents', letting them spoof arbitrary audit events and destroy the integrity of the log when it is later rendered or shipped."
+  },
+  {
+    "cwe": 204,
+    "locations": [
+      {
+        "file": "docstore/api.py",
+        "symbol": "handle_request",
+        "start_line": 34,
+        "end_line": 37,
+        "role": "site"
+      }
+    ],
+    "description": "handle_request maps PermissionDenied to 403 and NotFound to 404, so any user can probe document IDs: a document that exists but is not readable by them yields 403 while a nonexistent ID yields 404, giving unprivileged users a document-existence oracle over the store."
+  }
+]

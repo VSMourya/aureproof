@@ -1,0 +1,15 @@
+[
+  {
+    "cwe": 918,
+    "locations": [
+      {
+        "file": "linkpreview/service.py",
+        "symbol": "fetch_partner_feed",
+        "start_line": 49,
+        "end_line": 52,
+        "role": "site"
+      }
+    ],
+    "description": "fetch_partner_feed constructs URLs based on a partner identifier without applying URL validation (check_url). This may allow Server-Side Request Forgery (SSRF) to attacker‑controlled subdomains if a partner name can be influenced or if subdomains are vulnerable to takeover."
+  }
+]

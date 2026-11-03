@@ -13,6 +13,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
+from aureproof.contracts.specs import utc_instant
 from aureproof.contracts.thr import HealthStatus, TaskHealthRecord
 from aureproof.scoring.episode import EpisodeScore
 
@@ -30,7 +31,12 @@ def partition_by_health(
     *,
     protocol_frozen_at: str,
 ) -> Partition:
-    """Split episodes by their task's frozen health (UTC RFC 3339 timestamps)."""
+    """Split episodes by their task's frozen health (UTC RFC 3339 timestamps).
+
+    Times are compared as instants, never as strings: a record frozen half a
+    second after the protocol is not pre-registered.
+    """
+    freeze = utc_instant(protocol_frozen_at)  # refuses a malformed freeze time
     by_task = {r.task.task_identity: r for r in records}
     graded: dict[str, list[EpisodeScore]] = {}
     excluded: dict[str, str] = {}
@@ -40,7 +46,7 @@ def partition_by_health(
         pre_registered = (
             record is not None
             and record.frozen_at is not None
-            and record.frozen_at <= protocol_frozen_at
+            and utc_instant(record.frozen_at) <= freeze
         )
         if record is None or not pre_registered:
             if record is not None and record.status is not HealthStatus.HEALTHY:
