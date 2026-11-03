@@ -35,6 +35,11 @@ on one runner backend and fail on another (Harbor #136).
 | `reviewed_by[]`, `frozen_at` | Reviewers `{name, role: author \| independent_reviewer}`; freeze time (UTC) |
 | `canary_id`, `provenance` | Contamination canary; `{authorship, license}` |
 
+A record vouches only for the grader its controls ran under, in the status it derives.
+A comparison gate MUST re-check every record a protocol pins, offline, and MUST refuse a
+run when such a record is not `healthy`, or when the seal's `scoring_profile` or any
+re-scored episode's scoring identity differs from the record's `scoring_identity`.
+
 ## 3. Required controls and the health derivation
 
 | Control | Passes when |
@@ -82,7 +87,9 @@ asserted by hand.
 
 `aureproof.scoring.health.partition_by_health(episodes, records, protocol_frozen_at)`:
 
-- **Only records frozen before the protocol freeze decide exclusion.** A task whose
+- **Only records frozen at or before the protocol freeze decide exclusion.** Times are
+  compared as instants, not as strings: a record frozen at `…00:00:00.5Z` is after a
+  freeze at `…00:00:00Z`, and a malformed freeze time is refused. A task whose
   pre-registered record is `unhealthy` or `unknown` is **excluded**: its episodes leave
   the cohort before metrics, and it is reported as a dataset-health finding.
   **An unhealthy task never becomes an agent false positive.**

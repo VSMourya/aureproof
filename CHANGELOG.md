@@ -48,6 +48,21 @@ public API and the specs may change between minor versions).
   assessment. Such a protocol is now invalid when it is written (conformance vector
   `too-many-clusters`), and `decide` reports more than 20 rows as inconclusive
   instead of raising. Protocols with too few clusters to decide stay valid.
+- `aureproof compare` trusted the health records a decision rests on. It never checked a
+  pinned THR's `status` (only the runner's `slice.plan` refused a THR that is not
+  healthy), and never checked that the THR vouched for the grader that scored the run:
+  its `scoring_identity` was recorded and never read. The gate now fails closed when a
+  pinned THR is `unhealthy` or `unknown`, when its scoring identity differs from the
+  seal's `scoring_profile`, when the seal names no readable profile, or when a re-scored
+  episode carries another identity than the seal names. Every committed example and
+  bundle pins healthy THRs under the current identity, so no result changes.
+- Timestamps were ordered as strings, but `UtcTimestamp` allows an optional fraction of
+  any length, so `…00:00:00.5Z` sorted before `…00:00:00Z`. A Task Health Record frozen
+  half a second after the protocol freeze was applied as pre-registered and could exclude
+  a task; the latest adjudication record could lose to an earlier one; and an attempt
+  could end before it started. `contracts.specs.utc_instant` now orders them as
+  instants in `partition_by_health`, adjudication resolution and `AttemptRecord`, and a
+  malformed protocol freeze time is refused. Schemas are unchanged.
 - The comparison gate passed when no candidate could have failed. When A's yield is
   below the margin in every cluster, including when both configurations submit
   nothing (a broken runner or grader looks like this), every B was non-inferior by
