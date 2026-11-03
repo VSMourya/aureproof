@@ -8,7 +8,7 @@ from collections.abc import Sequence
 from fractions import Fraction
 
 from aureproof.contracts.decision import ClusterRow, Decision, DecisionProtocol, Interval
-from aureproof.stats.permutation import min_clusters, sign_flip
+from aureproof.stats.permutation import MAX_CLUSTERS, min_clusters, sign_flip
 from aureproof.stats.wilson import wilson
 
 
@@ -76,6 +76,9 @@ def decide(protocol: DecisionProtocol, rows: Sequence[ClusterRow]) -> Decision:
 
     if not diffs:
         return build("inconclusive", "inconclusive", "no cluster has a defined difference")
+    if len(diffs) > MAX_CLUSTERS:  # a valid protocol cannot produce this many rows
+        reason = f"{len(diffs)} clusters exceed the exact enumeration limit of {MAX_CLUSTERS}"
+        return build("inconclusive", "inconclusive", reason)
     result = sign_flip(diffs, alpha)
     stats = {
         "mean_difference": _fmt(result.mean),
