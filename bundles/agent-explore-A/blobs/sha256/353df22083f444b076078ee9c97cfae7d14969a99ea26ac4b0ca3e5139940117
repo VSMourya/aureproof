@@ -1,0 +1,56 @@
+[
+  {
+    "cwe": 93,
+    "locations": [
+      {
+        "file": "linkpreview/api.py",
+        "symbol": "handle_request",
+        "start_line": 15,
+        "end_line": 15,
+        "role": "source"
+      },
+      {
+        "file": "linkpreview/net.py",
+        "symbol": "check_url",
+        "start_line": 41,
+        "end_line": 46,
+        "role": "site"
+      },
+      {
+        "file": "linkpreview/service.py",
+        "symbol": "fetch_preview",
+        "start_line": 28,
+        "end_line": 30,
+        "role": "sink"
+      },
+      {
+        "file": "linkpreview/service.py",
+        "symbol": "fetch_icon",
+        "start_line": 39,
+        "end_line": 39,
+        "role": "sink"
+      }
+    ],
+    "description": "check_url validates a sanitized view of the URL but returns the raw attacker-controlled string: urlsplit() strips ASCII tab/CR/LF characters before parsing, so 'http://news.example/\\r\\nX-Injected: 1' passes the host allowlist (hostname parses as news.example), while the original string with the control characters intact is handed unchanged to transport.send by fetch_preview and fetch_icon. A chat user can therefore smuggle CR/LF and injected headers or request lines into the outbound HTTP request made by the injected transport (HTTP request/header injection or request smuggling through any pooling proxy), bypassing the intent of the URL policy."
+  },
+  {
+    "cwe": 248,
+    "locations": [
+      {
+        "file": "linkpreview/net.py",
+        "symbol": "check_url",
+        "start_line": 43,
+        "end_line": 43,
+        "role": "site"
+      },
+      {
+        "file": "linkpreview/api.py",
+        "symbol": "handle_request",
+        "start_line": 27,
+        "end_line": 32,
+        "role": "site"
+      }
+    ],
+    "description": "check_url calls urlsplit() on an unvalidated attacker string; for malformed URLs such as an unterminated IPv6 literal ('http://[') urlsplit raises a plain ValueError, which is not a Blocked instance and is not caught by handle_request's except clauses. Any chat user can supply such a target for the preview/icon actions and crash the request handler with an uncaught exception, degrading availability of the service."
+  }
+]

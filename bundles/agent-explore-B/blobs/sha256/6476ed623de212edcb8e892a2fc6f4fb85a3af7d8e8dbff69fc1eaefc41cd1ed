@@ -1,0 +1,12 @@
+[
+  {
+    "cwe": 770,
+    "locations": [
+      {"file": "docstore/service.py", "symbol": "DocumentStore.__init__", "start_line": 18, "end_line": 21, "role": "site"},
+      {"file": "docstore/service.py", "symbol": "update_document", "start_line": 55, "end_line": 57, "role": "site"},
+      {"file": "docstore/service.py", "symbol": "delete_document", "start_line": 64, "end_line": 66, "role": "site"},
+      {"file": "docstore/service.py", "symbol": "purge_all", "start_line": 71, "end_line": 73, "role": "site"}
+    ],
+    "description": "The audit log (`DocumentStore.audit`) is stored in an unbounded list and grows indefinitely with each operation, allowing an attacker to cause uncontrolled memory consumption (CWE-770)."
+  }
+]

@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal, Protocol
@@ -126,14 +126,49 @@ class ProbeError(RuntimeError):
     """The provider refused the call; the probe did not run."""
 
 
+OPENAI_API = "openai-api"
+
+
 def provider_model(model: str) -> str:
     """The provider's model ID, from `anthropic/<id>` (as `aureproof run` takes it) or `<id>`."""
     provider, sep, name = model.partition("/")
     if not sep:
         return model
     if provider != "anthropic" or not name:
-        raise ValueError(f"the single-shot probe calls only Anthropic models, not {model!r}")
+        raise ValueError(
+            "the single-shot probe calls Anthropic models, or an OpenAI-compatible endpoint "
+            f"as openai-api/<service>/<model>, not {model!r}"
+        )
     return name
+
+
+def probe_config(model: str, env: Mapping[str, str]) -> SingleShotConfig:
+    """The probe's configuration for `--model`.
+
+    `openai-api/<service>/<model>` follows Inspect's convention: the endpoint is
+    `<SERVICE>_BASE_URL` and the key `<SERVICE>_API_KEY`, with the service name
+    upper-cased and `-` read as `_`. Anything else is an Anthropic model.
+    """
+    provider, _, rest = model.partition("/")
+    if provider != OPENAI_API:
+        return SingleShotConfig(model=provider_model(model))
+    service, _, name = rest.partition("/")
+    if not service or not name:
+        raise ValueError(f"expected openai-api/<service>/<model>, not {model!r}")
+    prefix = service.upper().replace("-", "_")
+    base_url = env.get(f"{prefix}_BASE_URL", "").rstrip("/")
+    if not base_url:
+        raise ValueError(f"{model!r} needs {prefix}_BASE_URL, the endpoint's base URL")
+    if not base_url.startswith("https://"):
+        raise ValueError(f"{prefix}_BASE_URL must be an https URL, not {base_url!r}")
+    if not env.get(f"{prefix}_API_KEY"):
+        raise ValueError(f"{model!r} needs {prefix}_API_KEY")
+    return SingleShotConfig(
+        model=name,
+        provider_protocol="openai-chat-completions",
+        service=service,
+        base_url=base_url,
+    )
 
 
 @dataclass(frozen=True)
@@ -154,20 +189,23 @@ class SingleShotConfig:
     model: str
     max_tokens: int = 8192
     provider_protocol: str = "anthropic-messages"
-    sampling: str = "provider-default"  # the Messages API takes no temperature
+    sampling: str = "provider-default"  # no temperature is sent, on either protocol
+    service: str | None = None  # an OpenAI-compatible endpoint, with its base URL
+    base_url: str | None = None
 
     def identity(self) -> str:
-        return digest_ref(
-            {
-                "system": "single_shot_model",
-                "provider_protocol": self.provider_protocol,
-                "model": self.model,
-                "max_tokens": self.max_tokens,
-                "sampling": self.sampling,
-                "prompt_sha256": hashlib.sha256(SINGLE_SHOT_PROMPT.encode("utf-8")).hexdigest(),
-                "provider_retries": 0,
-            }
-        )
+        identity: dict[str, Any] = {
+            "system": "single_shot_model",
+            "provider_protocol": self.provider_protocol,
+            "model": self.model,
+            "max_tokens": self.max_tokens,
+            "sampling": self.sampling,
+            "prompt_sha256": hashlib.sha256(SINGLE_SHOT_PROMPT.encode("utf-8")).hexdigest(),
+            "provider_retries": 0,
+        }
+        if self.service is not None:  # absent for Anthropic, so recorded identities hold
+            identity |= {"service": self.service, "base_url": self.base_url}
+        return digest_ref(identity)
 
 
 def single_shot_input(paths: Paths, variant: str) -> str:
@@ -252,6 +290,88 @@ class AnthropicClient:
             input_tokens=message.usage.input_tokens,
             output_tokens=message.usage.output_tokens,
         )
+
+
+Post = Callable[[str, bytes, Mapping[str, str]], tuple[int, Mapping[str, str], bytes]]
+
+
+def _https_post(
+    url: str, body: bytes, headers: Mapping[str, str]
+) -> tuple[int, Mapping[str, str], bytes]:
+    """POST with the standard library; `probe_config` admits only https base URLs."""
+    import urllib.error
+    import urllib.request
+
+    request = urllib.request.Request(url, data=body, headers=dict(headers), method="POST")
+    try:
+        with urllib.request.urlopen(request, timeout=600) as response:
+            return response.status, dict(response.headers), response.read()
+    except urllib.error.HTTPError as error:
+        return error.code, dict(error.headers), error.read()
+
+
+class OpenAICompatibleClient:
+    """One Chat Completions request per call, with no retries (no hidden opportunities)."""
+
+    def __init__(
+        self, config: SingleShotConfig, env: Mapping[str, str], post: Post = _https_post
+    ) -> None:
+        if config.service is None or config.base_url is None:
+            raise ValueError("an OpenAI-compatible client needs probe_config's service")
+        key = env[f"{config.service.upper().replace('-', '_')}_API_KEY"]
+        self._config = config
+        self._url = f"{config.base_url}/chat/completions"
+        self._headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+        self._post = post
+
+    def complete(self, *, system: str, user: str, max_tokens: int) -> Reply:
+        body = {
+            "model": self._config.model,
+            "max_tokens": max_tokens,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+        }
+        try:
+            status, headers, raw = self._post(self._url, json.dumps(body).encode(), self._headers)
+        except OSError as error:  # URLError, timeouts, refused connections
+            raise ProbeError(f"provider error: {error}") from error
+        if status != 200:
+            raise ProbeError(f"provider error ({status}): {_error_text(raw)}")
+        data = json.loads(raw)
+        choice = data["choices"][0]
+        message = choice.get("message") or {}
+        usage = data.get("usage") or {}
+        lower = {k.lower(): v for k, v in headers.items()}
+        return Reply(
+            text=message.get("content") or "",
+            stop_reason=_stop_reason(choice.get("finish_reason"), message),
+            request_id=lower.get("x-request-id") or data.get("id"),
+            input_tokens=usage.get("prompt_tokens"),
+            output_tokens=usage.get("completion_tokens"),
+        )
+
+
+def _stop_reason(finish_reason: str | None, message: Mapping[str, Any]) -> str | None:
+    """Chat Completions finish reasons, in the Messages API's terms."""
+    if message.get("refusal") or finish_reason == "content_filter":
+        return "refusal"
+    if finish_reason == "length":
+        return "max_tokens"
+    if finish_reason == "stop":
+        return "end_turn"
+    return finish_reason
+
+
+def _error_text(raw: bytes) -> str:
+    try:
+        error = json.loads(raw).get("error")
+    except (ValueError, AttributeError):
+        return raw[:200].decode("utf-8", "replace")
+    if isinstance(error, dict):
+        return str(error.get("message", error))
+    return str(error or raw[:200].decode("utf-8", "replace"))
 
 
 # --- Recording ----------------------------------------------------------------------

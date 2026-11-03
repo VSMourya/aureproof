@@ -19,6 +19,19 @@ public API and the specs may change between minor versions).
   difference gets the same exact test; any fail is a fail and a pass needs both.
   Cluster rows carry recall support (`credited`, `positives`). A protocol without
   guardrails serializes as before and keeps its identity.
+- The exploratory agent comparison ran under its signed protocol: the reference
+  subject on Kimi-K3 (A) and gpt-oss-120b (B), 36 episodes each on the six public
+  pairs (`bundles/agent-explore-A/`, `bundles/agent-explore-B/`). Both bundles are
+  valid and re-score offline. Recall is 16/18 for each, and the gate is inconclusive
+  (CI [-1/4, 4/5] spans the margin). `docs/research/agent-explore.md` has the run
+  log. Both bundles are signed by `sign.yml` and verify offline.
+- `aureproof task probe --model openai-api/<service>/<model>` runs the single-shot
+  baseline against an OpenAI-compatible endpoint, reading `<SERVICE>_BASE_URL` (https
+  only) and `<SERVICE>_API_KEY` as Inspect does. One Chat Completions request per
+  variant, no retries, standard library only; the endpoint is part of the probe's
+  system identity, and Anthropic probe identities are unchanged.
+  `docs/research/difficulty-probe.md` records 126 probes of the six public pairs by
+  seven open models, three runs each, with every run in `docs/research/data/`.
 - The reference subject runs on OpenAI-compatible endpoints as
   `openai-api/<service>/<model>`, through Inspect's provider (the `inspect` extra now
   pins `openai==3.30.0`). Preflight refuses a missing `<SERVICE>_BASE_URL`, a missing
@@ -30,6 +43,21 @@ public API and the specs may change between minor versions).
   development data, not the pre-registered assessment.
 
 ### Fixed
+- Timestamps were ordered as strings, but `UtcTimestamp` allows an optional fraction of
+  any length, so `…00:00:00.5Z` sorted before `…00:00:00Z`. A Task Health Record frozen
+  half a second after the protocol freeze was applied as pre-registered and could exclude
+  a task; the latest adjudication record could lose to an earlier one; and an attempt
+  could end before it started. `contracts.specs.utc_instant` now orders them as
+  instants in `partition_by_health`, adjudication resolution and `AttemptRecord`, and a
+  malformed protocol freeze time is refused. Schemas are unchanged.
+- The comparison gate passed when no candidate could have failed. When A's yield is
+  below the margin in every cluster, including when both configurations submit
+  nothing (a broken runner or grader looks like this), every B was non-inferior by
+  construction, and `aureproof compare` exited 0. A pass now stands only if B with
+  yield 0 in every cluster would not also have passed; otherwise the provisional
+  outcome is pass and the outcome is inconclusive (specs/decision §5 rule 5,
+  vectors D-11 to D-15). This amends `decision/v0.1` after 0.1.0a1; no assessment has
+  run under it.
 - The SBOM was kept only as a workflow-run artifact, which expires, not attached to
   the GitHub release as the 0.1.0a1 notes said. `release.yml` has a new `attach` job:
   after PyPI accepts the files it signs the wheel, the sdist and the SBOM with the

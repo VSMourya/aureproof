@@ -20,6 +20,7 @@ from fractions import Fraction
 from typing import Literal
 
 from aureproof.contracts.adjudication import UNRESOLVED, Adjudication, Decision, Role
+from aureproof.contracts.specs import utc_instant
 from aureproof.scoring.episode import EpisodeScore
 
 MIN_DOUBLE_COVERAGE = Fraction(1, 5)  # plan §5.7: two adjudicators on at least 20%
@@ -79,7 +80,7 @@ def check(records: Sequence[Adjudication], items: Sequence[QueueItem], seal: str
 
 def _latest(records: Iterable[Adjudication]) -> dict[tuple[str, Role], Adjudication]:
     latest: dict[tuple[str, Role], Adjudication] = {}
-    for r in sorted(records, key=lambda r: r.timestamp):
+    for r in sorted(records, key=lambda r: utc_instant(r.timestamp)):
         latest[(r.adjudicator, r.role)] = r  # a later record supersedes; none is erased
     return latest
 
@@ -96,7 +97,7 @@ def resolve(items: Sequence[QueueItem], records: Sequence[Adjudication]) -> list
         votes = {r.decision for (_, role), r in latest.items() if role is not Role.RESOLUTION}
         decision: Decision | None
         if settled:
-            decision = max(settled, key=lambda r: r.timestamp).decision
+            decision = max(settled, key=lambda r: utc_instant(r.timestamp)).decision
         elif len(votes) == 1:
             decision = next(iter(votes))
         else:

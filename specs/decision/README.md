@@ -72,6 +72,16 @@ With interval [L, U] and margin δ:
 
 δ is the decimal written in the protocol, compared as an exact rational: `0.05` is 1/20, not the nearest binary float.
 4. **Incomplete adjudication:** if any unresolved finding remains, adjudicating it could move either yield. A decisive result is then recorded as `provisional_outcome`, and the `outcome` is **inconclusive**. An incomplete adjudication can never silently pass.
+5. **Vacuous pass:** a pass MUST be one the data could have withheld. Recompute L with B's
+   yield set to 0 in every cluster that entered the test (dᶜ = −aᶜ, where aᶜ is A's yield
+   there). Each subset mean rises with every dᶜ, so this is B's worst case on those
+   clusters. If that L is still > −δ, every possible B passes, and the result says
+   nothing about B: the `provisional_outcome` is **pass** and the `outcome` is
+   **inconclusive**. This happens when A's yields are too low for a regression to be
+   measured, for example when both configurations submit nothing, as a broken runner or
+   grader would. A fail can never be vacuous: with B's yield 1 everywhere, every dᶜ ≥ 0,
+   so U ≥ 0 ≥ −δ. To claim that B beats a weak baseline, pre-register δ = 0 (vectors
+   D-11 to D-15). Rule 4 is applied first.
 
 6. **Guardrails:** strict confirmed yield is a precision, so volume cannot raise it, but
    restraint can. A B that reports only its surest finding, or nothing where A did well
@@ -82,7 +92,8 @@ With interval [L, U] and margin δ:
    **inconclusive** otherwise (an intersection–union test: a pass is still an α-level
    claim; a false fail can reach up to (1 + guardrails)·α). Recall counts defects the
    matcher credited, which adjudication does not change, so a guardrail fail is final
-   while findings are unadjudicated (vectors G-01 to G-04).
+   while findings are unadjudicated (vectors G-01 to G-04). Rules 4 and 5 apply to the
+   primary test before it is combined; a guardrail uses rules 1–3 only.
 
 ## 6. Review questions and their resolutions
 

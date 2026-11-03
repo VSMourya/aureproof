@@ -41,7 +41,8 @@ comparable.
 
 Records are append-only. Re-adjudicating means adding a record. For each finding:
 
-1. For each adjudicator and role, the latest record (by timestamp) counts.
+1. For each adjudicator and role, the latest record (by timestamp) counts. Timestamps
+   are compared as instants, not as strings: `…12:00:00.5Z` is later than `…12:00:00Z`.
 2. If there is a `resolution` record, the latest one decides.
 3. Otherwise, if the `primary` and `second` records agree, that is the decision. If
    they disagree, the finding stays **undecided** until a resolution is recorded.

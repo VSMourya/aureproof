@@ -1,0 +1,15 @@
+[
+  {
+    "cwe": 284,
+    "locations": [
+      {
+        "file": "profilehub/api.py",
+        "symbol": "handle_request",
+        "start_line": 28,
+        "end_line": 36,
+        "role": "site"
+      }
+    ],
+    "description": "The request handler does not verify that the acting user account is active. Deactivated users can still perform profile, settings, admin, or deactivate actions, leading to unauthorized use of compromised or disabled accounts."
+  }
+]

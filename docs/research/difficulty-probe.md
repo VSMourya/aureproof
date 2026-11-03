@@ -2,7 +2,9 @@
 
 Issue #44 (AP-019). Rules: [`specs/thr/README.md`](../../specs/thr/README.md) §6.
 Reproduce with `uv run aureproof task probe <task> --json` (Bandit) and
-`--model <id>` for the single-shot baseline.
+`--model <id>` for the single-shot baseline: `anthropic/<id>`, or
+`openai-api/<service>/<id>` for an OpenAI-compatible endpoint, which reads
+`<SERVICE>_BASE_URL` and `<SERVICE>_API_KEY`.
 
 ## 2026-10-28: Bandit, the three calibrated pairs
 
@@ -81,3 +83,41 @@ which is not in the accepted family, and on `massassign-001` it named the right
 function with CWE-434 (file upload). The matcher leaves both unresolved for
 adjudication rather than crediting them. A separate call, made only to see those CWEs,
 is not part of this record.
+
+## 2026-11-01: seven open models, the six public pairs, three runs each
+
+Every public pair, probed single-shot by each of the seven models AkashML serves
+(`https://api.akashml.com/v1`), three independent runs per model and task: 126 probes and
+252 model calls, with `max_tokens` 8192 and the provider's default sampling. Each run is
+recorded, with its system identity, verdicts and request IDs, in
+[`data/probe-akashml-2026-11-01.json`](data/probe-akashml-2026-11-01.json). Bandit, run
+alongside each probe, solved none.
+
+| Model | `authz-001` | `path-001` | `authz-002` | `ssrf-001` | `redirect-001` | `massassign-001` | Solved | Not completed |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `moonshotai/Kimi-K3` | 3/3 | 3/3 | 2/3 | 2/3 | 3/3 | 2/3 | 15/18 | 16 budget_exhausted, 1 invalid_output (of 36 episodes) |
+| `openai/gpt-oss-120b` | 1/3 | 2/3 | 2/3 | 2/3 | 1/3 | 1/3 | 9/18 | none (of 36 episodes) |
+| `Qwen/Qwen3.8-27B` | 1/3 | 1/3 | 3/3 | 2/3 | 1/3 | 1/3 | 9/18 | 2 budget_exhausted, 10 invalid_output (of 36 episodes) |
+| `openai/gpt-oss-20b` | 3/3 | 2/3 | 0/3 | 1/3 | 0/3 | 1/3 | 7/18 | 1 invalid_output (of 36 episodes) |
+| `Qwen/Qwen3.6-35B-A3B` | 2/3 | 0/3 | 1/3 | 0/3 | 2/3 | 2/3 | 7/18 | 28 budget_exhausted (of 36 episodes) |
+| `zai-org/GLM-5.3` | 1/3 | 0/3 | 0/3 | 0/3 | 0/3 | 0/3 | 1/18 | 35 budget_exhausted (of 36 episodes) |
+| `meta-llama/Llama-3.3-70B-Instruct` | 0/3 | 0/3 | 0/3 | 0/3 | 0/3 | 0/3 | 0/18 | none (of 36 episodes) |
+
+A cell is the number of runs, out of three, in which the model solved the task: every
+labeled defect credited on the vulnerable variant and no focal refutation on the
+repaired one.
+
+**Reading.** By the rule in specs/thr §6, no pair is saturated, because Bandit solves none:
+78 probes are `open` and 48 `partial`. That rule says less than it seems to. A strong
+open model alone solves the pack single-shot, with Kimi-K3 at 15 of 18 runs and at least
+two of three runs on every task. Each pair is solved at least once by four or more of
+the seven models. Results also vary between runs of the same model on the same task,
+so a single probe run, like those of 2026-10-29, is weak evidence about a task's
+difficulty. The pairs discriminate between models: the solved counts run from 0 to 15 of 18. They do not show that
+a tool-using agent is needed. So the M3 pack (#49) should not treat "no single probe
+saturates it" as enough, and a harder pair should be judged on several runs of a
+strong model. The reasoning models GLM-5.3 and Qwen3.6 mostly used the 8,192-token
+budget before answering (`budget_exhausted`), so their counts are a lower bound under
+this budget, not their ability. Qwen3.8's ten `invalid_output` episodes are replies
+that were not a JSON array of findings.
+

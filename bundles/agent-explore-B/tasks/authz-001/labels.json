@@ -1,0 +1,93 @@
+{
+  "schema": "aureproof.labels/v0.1",
+  "task_id": "authz-001",
+  "task_revision": "0.1.0-draft",
+  "cluster_id": "authz-001",
+  "canary": "7effd90b-bc48-4bf8-ab0b-72dfff0d0f97",
+  "oracle_canary": "aa8d4c1d-242e-47a3-9099-ec978a3b0d2f",
+  "defects": [
+    {
+      "defect_id": "authz-001-d1",
+      "variants": [
+        "vulnerable"
+      ],
+      "summary": "delete_document removes any document for any authenticated actor: it uses the actor only for the audit entry and never checks ownership or admin rights, so a non-owner can delete another user's document through handle_request.",
+      "accepted_cwes": [
+        284,
+        285,
+        639,
+        862
+      ],
+      "anchors": [
+        {
+          "file": "docstore/service.py",
+          "symbol": "delete_document",
+          "line_range": [
+            60,
+            63
+          ],
+          "role": "site"
+        },
+        {
+          "file": "docstore/api.py",
+          "symbol": "handle_request",
+          "line_range": [
+            14,
+            38
+          ],
+          "role": "source"
+        }
+      ],
+      "calibration_poc": "calibration_poc.py"
+    }
+  ],
+  "focal_negative": {
+    "variant": "repaired",
+    "anchors": [
+      {
+        "file": "docstore/service.py",
+        "symbol": "delete_document",
+        "line_range": [
+          60,
+          65
+        ],
+        "role": "site"
+      },
+      {
+        "file": "docstore/api.py",
+        "symbol": "handle_request",
+        "line_range": [
+          14,
+          38
+        ],
+        "role": "source"
+      }
+    ]
+  },
+  "reviewed_negative_scope": [
+    {
+      "file": "docstore/service.py",
+      "symbol": "purge_all",
+      "note": "decoy: guarded by the @require_admin decorator defined in auth.py"
+    },
+    {
+      "file": "docstore/service.py",
+      "symbol": "list_public_titles",
+      "note": "decoy: intentionally public; returns only titles of documents marked public"
+    },
+    {
+      "file": "docstore/service.py",
+      "symbol": "read_document"
+    },
+    {
+      "file": "docstore/service.py",
+      "symbol": "update_document"
+    },
+    {
+      "file": "docstore/auth.py"
+    },
+    {
+      "file": "docstore/models.py"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "cwe": 918,
+    "locations": [
+      {
+        "file": "linkpreview/net.py",
+        "symbol": "next_location",
+        "start_line": 49,
+        "end_line": 54,
+        "role": "source"
+      },
+      {
+        "file": "linkpreview/service.py",
+        "symbol": "fetch_preview",
+        "start_line": 27,
+        "end_line": 35,
+        "role": "sink"
+      }
+    ],
+    "description": "fetch_preview validates only the initial URL with check_url; redirect targets taken from the server-controlled Location header (resolved by next_location) are passed to transport.send without re-validation. An open redirector or attacker-controlled page on an allowed host (news.example/blog.example/cdn.example) can make the service fetch arbitrary URLs, e.g. http://169.254.169.254/ internal services, non-http schemes, or HTTPS->HTTP downgrades (SSRF; note fetch_icon deliberately rejects all redirects)."
+  },
+  {
+    "cwe": 248,
+    "locations": [
+      {
+        "file": "linkpreview/net.py",
+        "symbol": "check_url",
+        "start_line": 41,
+        "end_line": 46,
+        "role": "site"
+      },
+      {
+        "file": "linkpreview/api.py",
+        "symbol": "handle_request",
+        "start_line": 18,
+        "end_line": 32,
+        "role": "site"
+      }
+    ],
+    "description": "check_url promises to raise Blocked for any disallowed URL, but urlsplit raises a plain ValueError on malformed attacker-controlled targets (e.g. \"http://[\") that is not a Blocked subclass, and handle_request only catches Blocked/KeyError/NotFound/TooManyRedirects. A crafted preview/icon target therefore crashes request handling with an uncaught exception."
+  }
+]

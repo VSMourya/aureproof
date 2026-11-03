@@ -1,0 +1,29 @@
+[
+  {
+    "cwe": 22,
+    "locations": [
+      {
+        "file": "reportvault/api.py",
+        "symbol": "handle_request",
+        "start_line": 23,
+        "end_line": 23,
+        "role": "source"
+      },
+      {
+        "file": "reportvault/service.py",
+        "symbol": "download_attachment",
+        "start_line": 29,
+        "end_line": 29,
+        "role": "site"
+      },
+      {
+        "file": "reportvault/service.py",
+        "symbol": "download_attachment",
+        "start_line": 31,
+        "end_line": 32,
+        "role": "sink"
+      }
+    ],
+    "description": "download_attachment validates the still percent-encoded name with is_plain_name, then joins the decoded name to vault.attachments without safe_join, so encoded separators and dot segments evade the check. A request such as {\"action\": \"download\", \"name\": \"%2e%2e%2f%2e%2e%2fetc%2fpasswd\"} (decodes to ../../etc/passwd) or an absolute path like %2fetc%2fpasswd passes validation and lets the caller read arbitrary files outside the attachments directory."
+  }
+]

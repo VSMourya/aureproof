@@ -1,0 +1,29 @@
+[
+  {
+    "cwe": 918,
+    "locations": [
+      {
+        "file": "linkpreview/net.py",
+        "symbol": "next_location",
+        "start_line": 49,
+        "end_line": 54,
+        "role": "source"
+      },
+      {
+        "file": "linkpreview/service.py",
+        "symbol": "fetch_preview",
+        "start_line": 27,
+        "end_line": 35,
+        "role": "site"
+      },
+      {
+        "file": "linkpreview/service.py",
+        "symbol": "fetch_preview",
+        "start_line": 30,
+        "end_line": 30,
+        "role": "sink"
+      }
+    ],
+    "description": "fetch_preview validates only the initial URL with check_url; the Location header of each 3xx response (resolved with urljoin in next_location) is assigned to current and fetched without re-validation. Anyone able to make an allowed host reply with a redirect (or control content on news.example/blog.example/cdn.example) can bypass ALLOWED_HOSTS and the http(s) restriction, making the service request arbitrary internal/external URLs (e.g. cloud metadata endpoints, internal services, or even non-http schemes supported by the transport) and returning up to 64 KiB of the response body to the caller."
+  }
+]

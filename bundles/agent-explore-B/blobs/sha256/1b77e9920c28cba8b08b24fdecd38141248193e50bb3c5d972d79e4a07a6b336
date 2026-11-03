@@ -1,0 +1,28 @@
+[
+  {
+    "cwe": 284,
+    "locations": [
+      {
+        "file": "reportvault/api.py",
+        "symbol": "handle_request",
+        "start_line": 1,
+        "end_line": 100,
+        "role": "site"
+      }
+    ],
+    "description": "The service exposes all vault operations without any authentication or authorization checks, allowing any caller to list, upload, download, read reports, or render templates. This improper access control (CWE-284) could be abused to steal confidential data or modify attachments."
+  },
+  {
+    "cwe": 681,
+    "locations": [
+      {
+        "file": "reportvault/service.py",
+        "symbol": "render_template",
+        "start_line": 30,
+        "end_line": 45,
+        "role": "site"
+      }
+    ],
+    "description": "Templates are rendered using Python's `str.format_map` with user-supplied values. If a template contains malicious format fields, an attacker can influence the rendering process (e.g., via format string injection) leading to information disclosure or unexpected code execution. Use a safe templating engine or sanitize template content."
+  }
+]

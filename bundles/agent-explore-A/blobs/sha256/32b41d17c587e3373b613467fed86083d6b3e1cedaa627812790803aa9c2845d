@@ -1,0 +1,29 @@
+[
+  {
+    "cwe": 915,
+    "locations": [
+      {
+        "file": "profilehub/api.py",
+        "symbol": "handle_request",
+        "start_line": 22,
+        "end_line": 30,
+        "role": "source"
+      },
+      {
+        "file": "profilehub/service.py",
+        "symbol": "update_profile",
+        "start_line": 28,
+        "end_line": 29,
+        "role": "site"
+      },
+      {
+        "file": "profilehub/service.py",
+        "symbol": "update_profile",
+        "start_line": 30,
+        "end_line": 30,
+        "role": "sink"
+      }
+    ],
+    "description": "update_profile applies attacker-controlled change keys to any attribute that exists on the User object (hasattr/setattr) instead of enforcing the SELF_EDITABLE allow-list ({display_name, email, bio}). A member can send changes {\"role\": \"admin\"} on their own profile to gain admin privileges and then manage any member, flip is_active, or change their username (which also breaks the actor.username != username identity check, enabling edits to other members' records)."
+  }
+]

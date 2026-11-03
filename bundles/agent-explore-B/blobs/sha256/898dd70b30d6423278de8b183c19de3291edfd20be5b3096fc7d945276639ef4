@@ -1,0 +1,22 @@
+[
+  {
+    "cwe": 601,
+    "locations": [
+      {
+        "file": "portalauth/api.py",
+        "symbol": "handle_request",
+        "start_line": 22,
+        "end_line": 25,
+        "role": "site"
+      },
+      {
+        "file": "portalauth/service.py",
+        "symbol": "finish_login",
+        "start_line": 23,
+        "end_line": 27,
+        "role": "source"
+      }
+    ],
+    "description": "The 'next' URL supplied to the login action is only checked to start with '/'. This allows crafted paths such as '/\\evil.com' or URLs with encoded slashes to redirect users to unintended locations, resulting in an open redirect vulnerability (CWE-601)."
+  }
+]

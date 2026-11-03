@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Aureproof</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --navy: #142030;
+        --navy-2: #1c2b3e;
+        --navy-3: #0c1622;
+        --paper: #f6f4ee;
+        --card: #fffdf8;
+        --rule: #ded9cc;
+        --gold: #e2b04a;
+        --gold-ink: #7f520f;
+        --ink: #142030;
+        --ink-soft: #3d4652;
+        --ink-mute: #5e6670;
+        --on-dark: #f4f1ea;
+        --on-dark-soft: #c9d2dc;
+        --on-dark-mute: #a3b0bf;
+        --sans: "Inter", sans-serif;
+        --mono: "JetBrains Mono", monospace;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--navy);
+        font-family: "Inter", sans-serif;
+      }
+      .scene {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        padding: 112px 128px 150px;
+        display: flex;
+        flex-direction: column;
+        gap: 44px;
+      }
+      .dark {
+        background: var(--navy);
+        color: var(--on-dark);
+      }
+      .light {
+        background: var(--paper);
+        color: var(--ink);
+      }
+      .eyebrow {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 28px;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+      }
+      .dark .eyebrow {
+        color: var(--gold);
+      }
+      .light .eyebrow {
+        color: var(--gold-ink);
+      }
+      .head {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      h1 {
+        font-size: 104px;
+        line-height: 1.05;
+        font-weight: 700;
+        letter-spacing: -2px;
+      }
+      h2 {
+        font-size: 68px;
+        line-height: 1.1;
+        font-weight: 700;
+        letter-spacing: -1px;
+      }
+      h3 {
+        font-size: 44px;
+        line-height: 1.15;
+        font-weight: 700;
+      }
+      p {
+        font-size: 40px;
+        line-height: 1.32;
+      }
+      .light p {
+        color: var(--ink-soft);
+      }
+      .dark p {
+        color: var(--on-dark-soft);
+      }
+      .row {
+        display: flex;
+        gap: 32px;
+      }
+      .card {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        padding: 44px;
+        border-radius: 18px;
+      }
+      .light .card {
+        background: var(--card);
+        border: 1px solid var(--rule);
+      }
+      .dark .card {
+        background: var(--navy-2);
+      }
+      .card.top {
+        border-top: 8px solid #c8912e;
+      }
+      .tag {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 28px;
+        letter-spacing: 2px;
+      }
+      .light .tag {
+        color: var(--gold-ink);
+      }
+      .dark .tag {
+        color: var(--gold);
+      }
+      .foot {
+        position: absolute;
+        left: 128px;
+        right: 128px;
+        bottom: 56px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 28px;
+      }
+      .light .foot {
+        color: var(--ink-mute);
+      }
+      .dark .foot {
+        color: var(--on-dark-mute);
+      }
+      .mono {
+        font-family: "JetBrains Mono", monospace;
+      }
+      .big {
+        font-size: 128px;
+        font-weight: 800;
+        white-space: nowrap;
+        line-height: 1;
+        letter-spacing: -3px;
+        color: var(--gold);
+      }
+      .stat {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 32px 36px;
+        border-radius: 18px;
+        background: var(--card);
+        border: 1px solid var(--rule);
+      }
+      .stat b {
+        font-size: 72px;
+        line-height: 1;
+        color: var(--ink);
+      }
+      .term {
+        width: 980px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 40px 44px;
+        border-radius: 18px;
+        background: var(--navy-3);
+        border: 1px solid #2c3b4e;
+        font-family: "JetBrains Mono", monospace;
+      }
+      .term .ln {
+        font-size: 30px;
+        line-height: 1.45;
+        color: var(--on-dark-soft);
+        white-space: pre;
+      }
+      .term .cmd {
+        color: var(--gold);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 34px;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--rule);
+        color: var(--ink-soft);
+      }
+      th {
+        color: var(--ink);
+        font-weight: 700;
+      }
+      tr.us td {
+        background: #f3e6cc;
+        color: var(--ink);
+        font-weight: 700;
+      }
+      .diagram {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .diagram img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="application/hyperframes-slideshow+json">
+      {
+        "slides": [
+          { "sceneId": "cover", "notes": "Aureproof checks AI agent evaluations. It does not run agents itself. It sits on top of the runners teams already use and makes the result something another person can check." },
+          { "sceneId": "problem", "fragments": [7.5, 8.5, 9.5], "notes": "Three gaps: is the instrument sound, can the record be checked, and is the decision honest about noise. Each maps to one of the three checks." },
+          { "sceneId": "whynow", "notes": "The curl figure is from Daniel Stenberg's own post. Recall alone is the wrong number for security agents; false alarms are what maintainers pay for." },
+          { "sceneId": "solution", "fragments": [19.5, 20.5, 21.5], "notes": "The first benchmark built on these checks measures whether a security agent's findings are real, on synthetic Python task pairs: a vulnerable and a repaired version of the same code." },
+          { "sceneId": "flow", "notes": "Walk the main path left to right, then point at the red lane: every failure stops the run instead of producing a quiet number. Every box is tied to code on main." },
+          { "sceneId": "arch", "notes": "The trusted controller owns grading. The agent runs in a sandbox with no network and never sees the provider key or the labels. The scoring core cannot do network or process I/O; an import-linter contract enforces it." },
+          { "sceneId": "demo", "fragments": [37.5, 38.5, 39.5], "notes": "Real output from the signed bundle in the repo. It is a demonstration of the chain on three task pairs with a small model, not a benchmark result." },
+          { "sceneId": "built", "notes": "Six task pairs are public; eight are private so they can be a held-out set. Every spec is self-reviewed so far, and the repo says so." },
+          { "sceneId": "customer", "notes": "The open core has to stay free for the signatures to mean anything. The paid parts are what teams do not want to run themselves. No revenue yet." },
+          { "sceneId": "compete", "notes": "Inspect and Harbor are far more mature. Aureproof aims to be best at one narrow thing: evaluation integrity, plus a false-alarm focused security benchmark." },
+          { "sceneId": "founder", "notes": "Scientific pipelines taught me that a result nobody can re-run is not a result. Aureproof applies that to agent evals." },
+          { "sceneId": "ask", "fragments": [67.5, 68.5, 69.5, 70.5], "notes": "The code for v0.1.0 is mostly there. What is missing is people: users, an outside reviewer and an outside reproduction." }
+        ]
+      }
+    </script>
+
+    <div id="root" data-composition-id="root" data-start="0" data-duration="72" data-width="1920" data-height="1080">
+    <!-- 1. Cover -->
+    <div id="cover" class="scene clip dark" data-composition-id="cover" data-start="0" data-duration="6" data-label="Cover" data-width="1920" data-height="1080" style="justify-content: center">
+      <p id="cover-eyebrow" class="eyebrow">Aureproof</p>
+      <h1 id="cover-title" style="max-width: 1400px">Evidence you can check for AI agent evals</h1>
+      <p id="cover-sub" style="max-width: 1360px; font-size: 44px">Open source. Signed, re-scorable results and a gate that can say “inconclusive”.</p>
+      <div class="foot"><span>Bindu Bhargava R Chintam, solo founder</span><span>github.com/bhargavchintam/aureproof</span></div>
+    </div>
+
+    <!-- 2. Problem -->
+    <div id="problem" class="scene clip light" data-composition-id="problem" data-start="6" data-duration="6" data-label="Problem" data-width="1920" data-height="1080">
+      <div class="head" id="problem-head">
+        <p class="eyebrow">The problem</p>
+        <h2>Agent eval results are hard to trust</h2>
+      </div>
+      <div class="row">
+        <div class="card" id="problem-c1">
+          <h3>Broken tasks still count</h3>
+          <p>A task with a broken grader still adds to the score. OpenAI found 59.4% of 138 audited SWE-bench Verified tasks flawed.</p>
+        </div>
+        <div class="card" id="problem-c2">
+          <h3>Results can’t be re-checked</h3>
+          <p>Scores travel as a number. Nobody outside the team can confirm how it was made.</p>
+        </div>
+        <div class="card" id="problem-c3">
+          <h3>Noise gets called a win</h3>
+          <p>Fixed thresholds can’t say “too close to call”, so a lucky run looks like progress.</p>
+        </div>
+      </div>
+      <div class="foot"><span>Source: OpenAI, “Why SWE-bench Verified no longer measures frontier coding capabilities”, Feb 2026</span><span>2</span></div>
+    </div>
+
+    <!-- 3. Why now -->
+    <div id="whynow" class="scene clip dark" data-composition-id="whynow" data-start="12" data-duration="6" data-label="Why now" data-width="1920" data-height="1080">
+      <div class="head" id="whynow-head">
+        <p class="eyebrow">Why now</p>
+        <h2 style="max-width: 1500px">Security agents are shipping, and false alarms have a real cost</h2>
+      </div>
+      <div class="row" style="align-items: center; gap: 72px; flex: 1">
+        <div id="whynow-stat" style="width: 800px; display: flex; flex-direction: column; gap: 20px">
+          <div class="big">15% → &lt;5%</div>
+          <p>Share of curl bug reports that were real, before curl ended its bug bounty in January 2026.</p>
+        </div>
+        <div id="whynow-side" style="flex: 1; display: flex; flex-direction: column; gap: 36px">
+          <p>Bugcrowd changed its rules for “AI slop” as queues rose over 334%.</p>
+          <p>A security agent is only useful if its findings are real.</p>
+        </div>
+      </div>
+      <div class="foot"><span>Sources: daniel.haxx.se, Jan 2026; Bugcrowd blog, Mar 2026</span><span>3</span></div>
+    </div>
+
+    <!-- 4. Solution -->
+    <div id="solution" class="scene clip light" data-composition-id="solution" data-start="18" data-duration="6" data-label="Solution" data-width="1920" data-height="1080">
+      <div class="head" id="solution-head">
+        <p class="eyebrow">The solution</p>
+        <h2>Three checks on top of the runner you already use</h2>
+      </div>
+      <div class="row">
+        <div class="card top" id="solution-c1">
+          <span class="tag">1 · THE INSTRUMENT</span>
+          <h3>Task health record</h3>
+          <p>The grader must pass controls before a task can count.</p>
+        </div>
+        <div class="card top" id="solution-c2">
+          <span class="tag">2 · THE RECORD</span>
+          <h3>Signed evidence bundle</h3>
+          <p>Anyone can verify it and re-score it offline.</p>
+        </div>
+        <div class="card top" id="solution-c3">
+          <span class="tag">3 · THE DECISION</span>
+          <h3>Pre-registered gate</h3>
+          <p>Pass, fail or inconclusive, with rules fixed before the run.</p>
+        </div>
+      </div>
+      <div class="foot"><span>Runs on Inspect AI today. Harbor is planned for v0.2. Apache-2.0.</span><span>4</span></div>
+    </div>
+
+    <!-- 5. End-to-end flow (Archify) -->
+    <div id="flow" class="scene clip light" data-composition-id="flow" data-start="24" data-duration="6" data-label="End-to-end flow" data-width="1920" data-height="1080" style="flex-direction: row; gap: 48px; align-items: center; padding: 72px 96px 120px 128px">
+      <div id="flow-text" style="width: 560px; display: flex; flex-direction: column; gap: 32px">
+        <p class="eyebrow">How it works</p>
+        <h2>One run, end to end</h2>
+        <p>Prove the grader, freeze the rules, run the agent in a sealed box, then let anyone check the result.</p>
+        <p style="color: #b4233c">Every failure stops the run. Nothing turns into a quiet number.</p>
+      </div>
+      <div class="diagram" id="flow-img" style="height: 880px">
+        <img src="assets/flow.png" alt="Aureproof end-to-end flow: author task pair, health controls, sign protocol, run, agent works in sandbox, label matcher, seal and sign, verify and re-score, comparison gate, with fail-closed stops" />
+      </div>
+      <div class="foot"><span>Diagram made with Archify; every box cites code on main</span><span>5</span></div>
+    </div>
+
+    <!-- 6. Architecture (Archify) -->
+    <div id="arch" class="scene clip light" data-composition-id="arch" data-start="30" data-duration="6" data-label="Architecture" data-width="1920" data-height="1080" style="gap: 20px; padding: 64px 96px 120px">
+      <div class="head" id="arch-head" style="flex-direction: row; align-items: baseline; gap: 32px">
+        <p class="eyebrow">Architecture</p>
+        <h2 style="font-size: 56px">What runs where</h2>
+      </div>
+      <div class="diagram" id="arch-img">
+        <img src="assets/architecture.png" alt="Aureproof architecture: trusted controller with CLI, orchestrator, Inspect runner, fixtures, label matcher and evidence bundle; untrusted sandbox with Claude Code; sign.yml and Sigstore; offline verifier and comparison gate" />
+      </div>
+      <div class="foot"><span>The agent never sees the provider key or the labels. The scoring core has no network access.</span><span>6</span></div>
+    </div>
+
+    <!-- 7. Demo -->
+    <div id="demo" class="scene clip dark" data-composition-id="demo" data-start="36" data-duration="6" data-label="Demo" data-width="1920" data-height="1080">
+      <div class="head" id="demo-head">
+        <p class="eyebrow">A real run</p>
+        <h2>A live agent run anyone can check offline</h2>
+      </div>
+      <div class="row" style="gap: 56px; align-items: flex-start">
+        <div class="term">
+          <div id="demo-t1">
+            <div class="ln cmd">$ aureproof validate bundles/m2-slice-2 \</div>
+            <div class="ln cmd">    --require-signature</div>
+            <div class="ln">V5 signature   pass  (sign.yml on main)</div>
+            <div class="ln">VALID</div>
+          </div>
+          <div id="demo-t2" style="margin-top: 18px">
+            <div class="ln cmd">$ aureproof score bundles/m2-slice-2 --offline</div>
+            <div class="ln">re-score: reproduced</div>
+            <div class="ln">known_defect_recall       3/3</div>
+            <div class="ln">strict_confirmed_yield    3/12</div>
+          </div>
+        </div>
+        <div id="demo-take" style="flex: 1; display: flex; flex-direction: column; gap: 32px">
+          <p>Claude Code with Claude Haiku 4.5 on 3 task pairs, one attempt each.</p>
+          <p>It found all 3 planted bugs. Only 3 of its 12 findings were real.</p>
+          <p style="color: var(--on-dark)"><b>Recall alone would call that perfect.</b></p>
+        </div>
+      </div>
+      <div class="foot"><span>A demonstration of the chain, not a benchmark result. Bundle and commands are in the public repo.</span><span>7</span></div>
+    </div>
+
+    <!-- 8. Built today -->
+    <div id="built" class="scene clip light" data-composition-id="built" data-start="42" data-duration="6" data-label="Built today" data-width="1920" data-height="1080">
+      <div class="head" id="built-head">
+        <p class="eyebrow">Built today</p>
+        <h2>Three weeks of work, all in the open</h2>
+      </div>
+      <div class="row" id="built-stats" style="gap: 24px">
+        <div class="stat"><b>101</b><p>commits</p></div>
+        <div class="stat"><b>786</b><p>tests</p></div>
+        <div class="stat"><b>87</b><p>merged PRs</p></div>
+        <div class="stat"><b>0.1.0a1</b><p>alpha on PyPI</p></div>
+      </div>
+      <div class="row" id="built-lists" style="gap: 48px">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 12px">
+          <h3>Built</h3>
+          <p>Three open specs, the Inspect runner, Sigstore signing, the gate and 14 healthy draft task pairs.</p>
+        </div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 12px">
+          <h3>Not yet</h3>
+          <p>Users, design partners, an outside reviewer, and a benchmark result on real agents.</p>
+        </div>
+      </div>
+      <div class="foot"><span>First commit October 10, 2026. Solo, part-time. Counts as of November 1.</span><span>8</span></div>
+    </div>
+
+    <!-- 9. Customer and business -->
+    <div id="customer" class="scene clip light" data-composition-id="customer" data-start="48" data-duration="6" data-label="Customer and business" data-width="1920" data-height="1080">
+      <div class="head" id="customer-head">
+        <p class="eyebrow">Customer and business</p>
+        <h2>Free open core, paid trust services</h2>
+      </div>
+      <div class="row" style="gap: 40px">
+        <div class="card" id="customer-who">
+          <h3>Who uses it first</h3>
+          <p><b>Teams building AI security agents</b> who need a false-alarm rate they can show buyers.</p>
+          <p><b>Eval teams</b> deciding if a new model or agent really improved.</p>
+        </div>
+        <div class="card" id="customer-money">
+          <h3>How it makes money</h3>
+          <p>Free: the Apache-2.0 tool, specs and public tasks.</p>
+          <p>Paid: hosted verification, private held-out runs and signed audit reports. No revenue yet.</p>
+        </div>
+      </div>
+      <div class="foot"><span>Later: buyers, auditors and regulated teams checking a vendor’s claims</span><span>9</span></div>
+    </div>
+
+    <!-- 10. Competition -->
+    <div id="compete" class="scene clip light" data-composition-id="compete" data-start="54" data-duration="6" data-label="Competition" data-width="1920" data-height="1080">
+      <div class="head" id="compete-head">
+        <p class="eyebrow">Competition</p>
+        <h2>A layer on top of existing tools</h2>
+      </div>
+      <table id="compete-table">
+        <tr><th style="width: 30%">Tool</th><th style="width: 22%">Task health</th><th style="width: 26%">Signed results</th><th style="width: 22%">3-way call</th></tr>
+        <tr><td>Inspect AI</td><td>admission checks</td><td>re-score, unsigned</td><td>error bars</td></tr>
+        <tr><td>Harbor</td><td>admission checks</td><td>regrade, unsigned</td><td>no</td></tr>
+        <tr><td>Braintrust, LangSmith</td><td>not the focus</td><td>hosted logs</td><td>thresholds</td></tr>
+        <tr class="us"><td>Aureproof</td><td>kept per task</td><td>Sigstore signed</td><td>yes</td></tr>
+      </table>
+      <p id="compete-note" style="font-size: 36px">Runs on Inspect, exports to Every Eval Ever, plans fixes upstream.</p>
+      <div class="foot"><span>From the cited landscape in docs/plan-review.md, October 2026</span><span>10</span></div>
+    </div>
+
+    <!-- 11. Founder -->
+    <div id="founder" class="scene clip dark" data-composition-id="founder" data-start="60" data-duration="6" data-label="Founder" data-width="1920" data-height="1080">
+      <div class="head" id="founder-head">
+        <p class="eyebrow">Founder</p>
+        <h2>Bindu Bhargava R Chintam</h2>
+        <p>Research Scientist, Research Foundation for SUNY · M.S. CS, Stony Brook</p>
+      </div>
+      <div class="row" id="founder-cards">
+        <div class="card"><span class="tag">MEASUREMENT</span><p>About 6 years of applied ML and data engineering: genomics, ICU, 5G, enterprise.</p></div>
+        <div class="card"><span class="tag">RESEARCH</span><p>7 publications and 3 patents, one granted in Australia (AU 2021102414).</p></div>
+        <div class="card"><span class="tag">AGENT SECURITY</span><p>Co-built Tripwire, runtime security for AI agent fleets, at SF Tech Week, Oct 2026.</p></div>
+      </div>
+      <div class="foot"><span>Open-source contributor to Spack and nf-core. Solo founder, part-time today.</span><span>11</span></div>
+    </div>
+
+    <!-- 12. Next 3 months and the ask -->
+    <div id="ask" class="scene clip light" data-composition-id="ask" data-start="66" data-duration="6" data-label="Next 3 months and the ask" data-width="1920" data-height="1080" style="gap: 36px">
+      <div class="head" id="ask-head">
+        <p class="eyebrow">Next 3 months</p>
+        <h2>From working code to first real users</h2>
+      </div>
+      <div class="row">
+        <div class="card" id="ask-m1"><span class="tag">MONTH 1</span><p>Talk to 10 to 15 eval and security-agent teams. Decide go or narrow.</p></div>
+        <div class="card" id="ask-m2"><span class="tag">MONTH 2</span><p>Two or three design partners run it on their own runs.</p></div>
+        <div class="card" id="ask-m3"><span class="tag">MONTH 3</span><p>Ship v0.1.0 with the first signed assessment.</p></div>
+      </div>
+      <div id="ask-box" style="display: flex; flex-direction: column; gap: 12px; padding: 36px 44px; border-radius: 18px; background: var(--navy)">
+        <h3 style="color: var(--gold)">The ask</h3>
+        <p style="color: var(--on-dark)">Funding to go full-time from November 1, 2026, and introductions to teams running agent evals.</p>
+      </div>
+      <div class="foot"><span>github.com/bhargavchintam/aureproof</span><span>12</span></div>
+    </div>
+
+    </div>
+
+    <script>
+      // One root timeline drives the whole deck. The presenter seeks
+      // window.__timelines.root; scene timelines are registered empty so the
+      // engine does not wait for them.
+      (function () {
+        var SCENES = [
+          ["cover", 0], ["problem", 6], ["whynow", 12], ["solution", 18],
+          ["flow", 24], ["arch", 30], ["demo", 36], ["built", 42],
+          ["customer", 48], ["compete", 54], ["founder", 60], ["ask", 66],
+        ];
+        var LEN = 6;
+        var TOTAL = 72;
+        var ease = "power3.out";
+        window.__timelines = window.__timelines || {};
+        var tl = gsap.timeline({ paused: true });
+
+        function enter(sel, at) {
+          tl.fromTo(sel, { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.6, ease: ease, immediateRender: false }, at);
+        }
+        // A reveal is fully shown by its fragment hold time (absolute seconds).
+        function reveal(sel, hold) {
+          tl.fromTo(sel, { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.4, ease: ease, immediateRender: false }, hold - 0.45);
+        }
+        function hide(sels) {
+          gsap.set(sels, { opacity: 0 });
+        }
+
+        hide(["#cover-eyebrow", "#cover-title", "#cover-sub"]);
+        enter("#cover-eyebrow", 0.1); enter("#cover-title", 0.3); enter("#cover-sub", 0.7);
+
+        hide(["#problem-head", "#problem-c1", "#problem-c2", "#problem-c3"]);
+        enter("#problem-head", 6.1); reveal("#problem-c1", 7.5); reveal("#problem-c2", 8.5); reveal("#problem-c3", 9.5);
+
+        hide(["#whynow-head", "#whynow-stat", "#whynow-side"]);
+        enter("#whynow-head", 12.1); enter("#whynow-stat", 12.6); enter("#whynow-side", 13.2);
+
+        hide(["#solution-head", "#solution-c1", "#solution-c2", "#solution-c3"]);
+        enter("#solution-head", 18.1); reveal("#solution-c1", 19.5); reveal("#solution-c2", 20.5); reveal("#solution-c3", 21.5);
+
+        hide(["#flow-text", "#flow-img"]);
+        enter("#flow-text", 24.1);
+        tl.fromTo("#flow-img", { opacity: 0, scale: 0.97 }, { opacity: 1, scale: 1, duration: 0.8, ease: ease, immediateRender: false }, 24.5);
+
+        hide(["#arch-head", "#arch-img"]);
+        enter("#arch-head", 30.1);
+        tl.fromTo("#arch-img", { opacity: 0, scale: 0.97 }, { opacity: 1, scale: 1, duration: 0.8, ease: ease, immediateRender: false }, 30.5);
+
+        hide(["#demo-head", "#demo-t1", "#demo-t2", "#demo-take"]);
+        enter("#demo-head", 36.1); reveal("#demo-t1", 37.5); reveal("#demo-t2", 38.5); reveal("#demo-take", 39.5);
+
+        hide(["#built-head", "#built-stats", "#built-lists"]);
+        enter("#built-head", 42.1); enter("#built-stats", 42.5); enter("#built-lists", 43.1);
+
+        hide(["#customer-head", "#customer-who", "#customer-money"]);
+        enter("#customer-head", 48.1); enter("#customer-who", 48.5); enter("#customer-money", 49.0);
+
+        hide(["#compete-head", "#compete-table", "#compete-note"]);
+        enter("#compete-head", 54.1); enter("#compete-table", 54.5); enter("#compete-note", 55.1);
+
+        hide(["#founder-head", "#founder-cards"]);
+        enter("#founder-head", 60.1); enter("#founder-cards", 60.6);
+
+        hide(["#ask-head", "#ask-m1", "#ask-m2", "#ask-m3", "#ask-box"]);
+        enter("#ask-head", 66.1); reveal("#ask-m1", 67.5); reveal("#ask-m2", 68.5); reveal("#ask-m3", 69.5); reveal("#ask-box", 70.5);
+
+        tl.to({}, { duration: 0.01 }, TOTAL - 0.01);
+        window.__timelines["root"] = tl;
+        SCENES.forEach(function (s) {
+          window.__timelines[s[0]] = gsap.timeline({ paused: true });
+        });
+
+        // Only the scene under the playhead is visible (and clickable).
+        function updateVisibility(t) {
+          SCENES.forEach(function (s) {
+            var el = document.getElementById(s[0]);
+            if (!el) return;
+            var active = t >= s[1] && t < s[1] + LEN;
+            el.style.opacity = active ? "1" : "0";
+            el.style.visibility = active ? "visible" : "hidden";
+            el.style.pointerEvents = active ? "auto" : "none";
+          });
+        }
+        window.__hfSetTime = updateVisibility;
+        tl.eventCallback("onUpdate", function () {
+          updateVisibility(tl.time());
+        });
+        tl.seek(0);
+        updateVisibility(0);
+
+        // Tell a standalone slideshow wrapper where each scene sits.
+        function postTimeline() {
+          if (window.parent === window) return;
+          window.parent.postMessage({
+            source: "hf-preview",
+            type: "timeline",
+            durationInFrames: TOTAL * 30,
+            scenes: SCENES.map(function (s) { return { id: s[0], start: s[1], duration: LEN }; }),
+          }, "*");
+        }
+        if (document.readyState === "complete") setTimeout(postTimeline, 300);
+        else window.addEventListener("load", function () { setTimeout(postTimeline, 300); });
+      })();
+    </script>
+  </body>
+</html>

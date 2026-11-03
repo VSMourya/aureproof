@@ -1,0 +1,28 @@
+[
+  {
+    "cwe": 918,
+    "locations": [
+      {
+        "file": "linkpreview/service.py",
+        "symbol": "fetch_preview",
+        "start_line": 27,
+        "end_line": 35,
+        "role": "site"
+      }
+    ],
+    "description": "fetch_preview follows HTTP redirects without re‑validating the target URL. An attacker can supply a URL on an allowed host that redirects to an external host, bypassing the ALLOWED_HOSTS check and enabling SSRF."
+  },
+  {
+    "cwe": 20,
+    "locations": [
+      {
+        "file": "linkpreview/net.py",
+        "symbol": "check_url",
+        "start_line": 41,
+        "end_line": 46,
+        "role": "site"
+      }
+    ],
+    "description": "check_url validates only the scheme and hostname, allowing any port on an allowed host. This permits requests to internal services running on non‑standard ports, a form of SSRF via port abuse."
+  }
+]
