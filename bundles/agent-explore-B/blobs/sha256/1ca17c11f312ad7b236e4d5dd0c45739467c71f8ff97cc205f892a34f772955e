@@ -1,0 +1,1 @@
+[{"cwe":22,"locations":[{"file":"reportvault/service.py","symbol":"download_attachment","start_line":28,"end_line":32,"role":"site"}],"description":"Path traversal via percent encoding in download_attachment"}]

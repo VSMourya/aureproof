@@ -1,0 +1,15 @@
+[
+  {
+    "cwe": 918,
+    "locations": [
+      {
+        "file": "linkpreview/service.py",
+        "symbol": "fetch_preview",
+        "start_line": 27,
+        "end_line": 35,
+        "role": "site"
+      }
+    ],
+    "description": "fetch_preview validates only the initial URL, but follows redirects without re‑validating the target host. An attacker can supply a URL on an allowed host that redirects to an arbitrary external host, enabling server‑side request forgery (SSRF)."
+  }
+]

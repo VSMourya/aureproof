@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -11,6 +12,7 @@ from typing import Any
 import pytest
 from typer.testing import CliRunner
 
+from aureproof.bundle.canonical import digest_ref
 from aureproof.cli.main import app
 from aureproof.contracts.findings import Finding
 from aureproof.contracts.sarif import findings_from_sarif, findings_to_sarif
@@ -20,10 +22,12 @@ from aureproof.oracles import probe
 from aureproof.oracles.calibration import Paths, calibrate
 from aureproof.oracles.probe import (
     SINGLE_SHOT_PROMPT,
+    OpenAICompatibleClient,
     ProbeError,
     Reply,
     SingleShotConfig,
     bandit_baseline,
+    probe_config,
     provider_model,
     saturation,
     single_shot_baseline,
@@ -287,15 +291,148 @@ def test_task_probe_cli_refuses_unknown_tasks_and_existing_outputs(tmp_path: Pat
 def test_the_probe_takes_the_model_with_or_without_its_provider() -> None:
     assert provider_model("anthropic/claude-haiku-4-5-20251001") == "claude-haiku-4-5-20251001"
     assert provider_model("claude-haiku-4-5-20251001") == "claude-haiku-4-5-20251001"
-    with pytest.raises(ValueError, match="only Anthropic"):
+    with pytest.raises(ValueError, match="openai-api/<service>/<model>"):
         provider_model("openai/gpt-5")
+
+
+# --- OpenAI-compatible endpoints (Inspect's openai-api/<service>/<model>) ---------------
+
+ENV = {"AKASHML_API_KEY": "k-test", "AKASHML_BASE_URL": "https://api.example.test/v1/"}
+
+
+def test_an_openai_compatible_model_reads_its_endpoint_from_the_environment() -> None:
+    config = probe_config("openai-api/akashml/openai/gpt-oss-120b", ENV)
+    assert config.model == "openai/gpt-oss-120b"
+    assert config.service == "akashml"
+    assert config.base_url == "https://api.example.test/v1"
+    assert config.provider_protocol == "openai-chat-completions"
+    assert probe_config("anthropic/claude-haiku-4-5", {}).service is None
+
+
+@pytest.mark.parametrize(
+    ("model", "env", "message"),
+    [
+        ("openai-api/akashml", ENV, "openai-api/<service>/<model>"),
+        ("openai-api/akashml/m", {"AKASHML_API_KEY": "k"}, "AKASHML_BASE_URL"),
+        ("openai-api/akashml/m", {"AKASHML_BASE_URL": "https://x/v1"}, "AKASHML_API_KEY"),
+        ("openai-api/my-svc/m", {"MY_SVC_API_KEY": "k"}, "MY_SVC_BASE_URL"),
+        ("openai-api/akashml/m", {**ENV, "AKASHML_BASE_URL": "http://x/v1"}, "https"),
+    ],
+)
+def test_an_openai_compatible_model_without_its_endpoint_is_refused(
+    model: str, env: dict[str, str], message: str
+) -> None:
+    with pytest.raises(ValueError, match=message):
+        probe_config(model, env)
+
+
+def test_the_endpoint_is_part_of_the_identity_and_anthropic_identities_do_not_move() -> None:
+    other = {**ENV, "AKASHML_BASE_URL": "https://elsewhere.test/v1"}
+    a = probe_config("openai-api/akashml/m", ENV)
+    assert a.identity() != probe_config("openai-api/akashml/m", other).identity()
+    assert a.identity() != SingleShotConfig(model="m").identity()
+    # the recorded identity of an Anthropic probe, before endpoints existed
+    assert SingleShotConfig(model="claude-haiku-4-5-20251001").identity() == digest_ref(
+        {
+            "system": "single_shot_model",
+            "provider_protocol": "anthropic-messages",
+            "model": "claude-haiku-4-5-20251001",
+            "max_tokens": 8192,
+            "sampling": "provider-default",
+            "prompt_sha256": hashlib.sha256(SINGLE_SHOT_PROMPT.encode()).hexdigest(),
+            "provider_retries": 0,
+        }
+    )
+
+
+Sent = tuple[str, dict[str, Any], dict[str, str]]
+
+
+def openai_client(status: int, body: dict[str, Any]) -> tuple[OpenAICompatibleClient, list[Sent]]:
+    seen: list[Sent] = []
+
+    def post(url: str, data: bytes, headers: Any) -> tuple[int, dict[str, str], bytes]:
+        seen.append((url, json.loads(data), dict(headers)))
+        return status, {"X-Request-Id": "req-9"}, json.dumps(body).encode()
+
+    config = probe_config("openai-api/akashml/openai/gpt-oss-120b", ENV)
+    return OpenAICompatibleClient(config, ENV, post=post), seen
+
+
+def completion(content: str | None, finish: str, **message: Any) -> dict[str, Any]:
+    return {
+        "id": "chatcmpl-1",
+        "choices": [
+            {
+                "message": {"role": "assistant", "content": content, **message},
+                "finish_reason": finish,
+            }
+        ],
+        "usage": {"prompt_tokens": 74, "completion_tokens": 20},
+    }
+
+
+def test_the_openai_client_sends_one_plain_chat_completion() -> None:
+    client, seen = openai_client(200, completion(CORRECT, "stop"))
+    reply = client.complete(system="sys", user="usr", max_tokens=99)
+    assert reply == Reply(CORRECT, "end_turn", "req-9", 74, 20)
+    ((url, body, headers),) = seen  # one request: no retries
+    assert url == "https://api.example.test/v1/chat/completions"
+    assert headers["Authorization"] == "Bearer k-test"
+    assert body == {
+        "model": "openai/gpt-oss-120b",
+        "max_tokens": 99,
+        "messages": [{"role": "system", "content": "sys"}, {"role": "user", "content": "usr"}],
+    }  # no temperature: provider default, as with the Messages API
+
+
+@pytest.mark.parametrize(
+    ("body", "stop"),
+    [
+        (completion("[{", "length"), "max_tokens"),
+        (completion(None, "content_filter"), "refusal"),
+        (completion(None, "stop", refusal="I can't help with that."), "refusal"),
+        (completion(None, "stop"), "end_turn"),
+    ],
+)
+def test_the_openai_finish_reasons_map_to_the_probe_outcomes(body: dict, stop: str) -> None:
+    client, _ = openai_client(200, body)
+    assert client.complete(system="s", user="u", max_tokens=1).stop_reason == stop
+
+
+def test_an_openai_provider_error_is_a_probe_error() -> None:
+    client, _ = openai_client(401, {"error": {"message": "invalid api key"}})
+    with pytest.raises(ProbeError, match=r"provider error \(401\): invalid api key"):
+        client.complete(system="s", user="u", max_tokens=1)
 
 
 def test_task_probe_cli_refuses_another_provider_before_any_call() -> None:
     args = ["task", "probe", "path-001", "--root", str(ROOT), "--model", "openai/gpt-5"]
     result = runner.invoke(app, args)
     assert result.exit_code == 2
-    assert "only Anthropic" in result.output
+    assert "openai-api/<service>/<model>" in result.output
+
+
+def test_task_probe_cli_runs_an_openai_compatible_model(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    used: list[SingleShotConfig] = []
+
+    class Fake:
+        def __init__(self, config: SingleShotConfig, env: Any = None) -> None:
+            used.append(config)
+
+        def complete(self, *, system: str, user: str, max_tokens: int) -> Reply:
+            return Reply("[]", "end_turn")
+
+    for key, value in ENV.items():
+        monkeypatch.setenv(key, value)
+    monkeypatch.setattr(probe, "OpenAICompatibleClient", Fake)
+    args = ["task", "probe", "path-001", "--root", str(ROOT), "--json"]
+    result = runner.invoke(app, [*args, "--model", "openai-api/akashml/openai/gpt-oss-120b"])
+    assert result.exit_code == 0, result.output
+    assert used[0].service == "akashml" and used[0].model == "openai/gpt-oss-120b"
+    assert json.loads(result.output)["saturation"] == "open"
 
 
 def test_task_probe_cli_reports_a_provider_error_without_a_traceback(

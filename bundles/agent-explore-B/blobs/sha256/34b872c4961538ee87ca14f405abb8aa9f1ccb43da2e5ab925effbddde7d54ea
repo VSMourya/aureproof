@@ -1,0 +1,15 @@
+[
+  {
+    "cwe": 284,
+    "locations": [
+      {
+        "file": "invoicer/service.py",
+        "symbol": "get_invoice",
+        "start_line": 40,
+        "end_line": 45,
+        "role": "site"
+      }
+    ],
+    "description": "get_invoice fails to verify that the invoice belongs to the requested tenant. It only checks existence, so a member of any tenant can retrieve invoices from other tenants by supplying an invoice ID from another tenant, leading to unauthorized data exposure."
+  }
+]

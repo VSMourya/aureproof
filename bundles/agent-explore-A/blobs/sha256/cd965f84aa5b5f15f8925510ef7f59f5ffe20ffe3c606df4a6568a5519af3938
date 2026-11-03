@@ -1,0 +1,22 @@
+[
+  {
+    "cwe": 601,
+    "locations": [
+      {
+        "file": "portalauth/api.py",
+        "symbol": "handle_request",
+        "start_line": 17,
+        "end_line": 17,
+        "role": "source"
+      },
+      {
+        "file": "portalauth/service.py",
+        "symbol": "finish_login",
+        "start_line": 23,
+        "end_line": 27,
+        "role": "sink"
+      }
+    ],
+    "description": "The post-login 'next' target from the request is validated in finish_login with only next_url.startswith('/'), so scheme-relative URLs like //evil.example and backslash variants like /\\evil.example (which browsers normalize to a '//' authority) pass and are returned as the 302 Location after a successful magic-link sign-in. This is an open redirect usable for phishing (a genuine portal URL that logs the victim in, then sends them off-site); the is_local_path() helper used by finish_logout would reject these inputs but is not used here."
+  }
+]

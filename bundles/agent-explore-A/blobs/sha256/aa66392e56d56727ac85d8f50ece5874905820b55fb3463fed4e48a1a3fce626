@@ -1,0 +1,42 @@
+[
+  {
+    "cwe": 668,
+    "locations": [
+      {
+        "file": "invoicer/service.py",
+        "symbol": "InvoiceStore.add",
+        "start_line": 24,
+        "end_line": 25,
+        "role": "site"
+      },
+      {
+        "file": "invoicer/service.py",
+        "symbol": "InvoiceStore.__init__",
+        "start_line": 22,
+        "end_line": 22,
+        "role": "site"
+      }
+    ],
+    "description": "All tenants' invoices are kept in a single flat dict keyed only by invoice_id, with no tenant namespacing. Invoice numbers are normally unique only per tenant, so when two tenants use the same invoice_id the later add() silently overwrites the other tenant's invoice, destroying its data, status, and share links (verified: adding tenant B's invoice '1' erases tenant A's invoice '1'). The store should key by (tenant_id, invoice_id) to preserve tenant isolation."
+  },
+  {
+    "cwe": 248,
+    "locations": [
+      {
+        "file": "invoicer/api.py",
+        "symbol": "handle_request",
+        "start_line": 27,
+        "end_line": 29,
+        "role": "source"
+      },
+      {
+        "file": "invoicer/service.py",
+        "symbol": "shared_view",
+        "start_line": 63,
+        "end_line": 63,
+        "role": "sink"
+      }
+    ],
+    "description": "The public, unauthenticated 'shared' endpoint only checks that token is a non-empty str before passing it to hmac.compare_digest, which raises TypeError for str inputs containing non-ASCII characters; handle_request catches only NotFound, so the exception propagates. Any client can crash the request handler (and gain a per-request DoS / 500) without login by sending a non-ASCII share token, e.g. token='\\u00e9' (verified)."
+  }
+]

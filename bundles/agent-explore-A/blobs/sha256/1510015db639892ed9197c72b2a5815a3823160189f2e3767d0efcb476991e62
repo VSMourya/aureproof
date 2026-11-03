@@ -1,0 +1,22 @@
+[
+  {
+    "cwe": 248,
+    "locations": [
+      {
+        "file": "invoicer/api.py",
+        "symbol": "handle_request",
+        "start_line": 26,
+        "end_line": 29,
+        "role": "source"
+      },
+      {
+        "file": "invoicer/service.py",
+        "symbol": "shared_view",
+        "start_line": 63,
+        "end_line": 63,
+        "role": "sink"
+      }
+    ],
+    "description": "The unauthenticated 'shared' action forwards the caller-supplied token (validated only as a non-empty str) to hmac.compare_digest, which raises TypeError for non-ASCII strings. handle_request catches only NotFound around shared_view, so once any invoice has a share token, anyone can crash every request to the service with a single non-ASCII token (denial of service via uncaught exception)."
+  }
+]

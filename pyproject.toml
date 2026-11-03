@@ -42,7 +42,7 @@ aureproof = "aureproof.cli.main:app"
 [project.optional-dependencies]
 inspect = [
     "anthropic>=1.13,<3",
-    "inspect-ai==0.3.283",
+    "inspect-ai==0.3.286",
     "inspect-swe==0.2.72",
     "openai==3.30.0",  # Inspect's openai-api provider (the reference subject on other endpoints)
 ]

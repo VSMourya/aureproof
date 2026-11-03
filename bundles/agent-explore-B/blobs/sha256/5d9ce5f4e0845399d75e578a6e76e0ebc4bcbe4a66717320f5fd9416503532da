@@ -1,0 +1,15 @@
+[
+  {
+    "cwe": 22,
+    "locations": [
+      {
+        "file": "reportvault/service.py",
+        "symbol": "download_attachment",
+        "start_line": 28,
+        "end_line": 32,
+        "role": "site"
+      }
+    ],
+    "description": "download_attachment validates the raw name before percent-decoding, allowing an attacker to craft a %2F or %2E%2E encoded filename that bypasses the is_plain_name check and leads to path traversal or hidden file disclosure. The function should decode before validation or use safe_join like other operations."
+  }
+]

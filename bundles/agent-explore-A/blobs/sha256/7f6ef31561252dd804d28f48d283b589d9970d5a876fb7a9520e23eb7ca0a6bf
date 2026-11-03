@@ -1,0 +1,22 @@
+[
+  {
+    "cwe": 601,
+    "locations": [
+      {
+        "file": "portalauth/api.py",
+        "symbol": "handle_request",
+        "start_line": 17,
+        "end_line": 17,
+        "role": "source"
+      },
+      {
+        "file": "portalauth/service.py",
+        "symbol": "finish_login",
+        "start_line": 25,
+        "end_line": 27,
+        "role": "sink"
+      }
+    ],
+    "description": "finish_login validates the attacker-controlled 'next' parameter only with startswith('/'), so protocol-relative URLs like '//evil.example' and backslash variants like '/\\evil.example' pass the check; after a successful magic-link sign-in the user is redirected to an attacker-chosen external site (open redirect usable for phishing). It should enforce is_local_path(), as finish_logout already does."
+  }
+]

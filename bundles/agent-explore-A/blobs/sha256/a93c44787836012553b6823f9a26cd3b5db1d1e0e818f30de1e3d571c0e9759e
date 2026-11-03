@@ -1,0 +1,56 @@
+[
+  {
+    "cwe": 918,
+    "locations": [
+      {
+        "file": "linkpreview/api.py",
+        "symbol": "handle_request",
+        "start_line": 18,
+        "end_line": 18,
+        "role": "source"
+      },
+      {
+        "file": "linkpreview/net.py",
+        "symbol": "check_url",
+        "start_line": 41,
+        "end_line": 46,
+        "role": "site"
+      },
+      {
+        "file": "linkpreview/service.py",
+        "symbol": "fetch_preview",
+        "start_line": 88,
+        "end_line": 90,
+        "role": "sink"
+      }
+    ],
+    "description": "check_url validates the hostname/scheme of urlsplit's normalized interpretation (Python strips ASCII tab/CR/LF before parsing and treats backslashes differently from WHATWG URL parsers) but returns the original raw string, and that raw attacker-controlled string is what transport.send fetches. URLs such as \"https://news.example/path\\tInjected-Header: x\" or \"https://evil.com\\@news.example/\" pass the allowlist while any injected transport that builds its own request or parses URLs differently is steered off the allowlisted hosts, bypassing the SSRF guard."
+  },
+  {
+    "cwe": 248,
+    "locations": [
+      {
+        "file": "linkpreview/api.py",
+        "symbol": "handle_request",
+        "start_line": 21,
+        "end_line": 35,
+        "role": "site"
+      },
+      {
+        "file": "linkpreview/net.py",
+        "symbol": "check_url",
+        "start_line": 43,
+        "end_line": 43,
+        "role": "site"
+      },
+      {
+        "file": "linkpreview/net.py",
+        "symbol": "next_location",
+        "start_line": 53,
+        "end_line": 53,
+        "role": "site"
+      }
+    ],
+    "description": "urlsplit() in check_url and urljoin() in next_location raise plain ValueError for malformed URLs (e.g. target \"https://[::1\", an NFKC-invalid netloc, or a malformed redirect Location returned by an otherwise allowed host). handle_request only catches Blocked (a ValueError subclass, which does not cover other ValueErrors), KeyError, NotFound and TooManyRedirects, so a single crafted request target escapes the handler as an uncaught exception, crashing the request (denial of service / 500 instead of a 400)."
+  }
+]
