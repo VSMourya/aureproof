@@ -36,6 +36,13 @@ public API and the specs may change between minor versions).
   development data, not the pre-registered assessment.
 
 ### Fixed
+- Timestamps were ordered as strings, but `UtcTimestamp` allows an optional fraction of
+  any length, so `…00:00:00.5Z` sorted before `…00:00:00Z`. A Task Health Record frozen
+  half a second after the protocol freeze was applied as pre-registered and could exclude
+  a task; the latest adjudication record could lose to an earlier one; and an attempt
+  could end before it started. `contracts.specs.utc_instant` now orders them as
+  instants in `partition_by_health`, adjudication resolution and `AttemptRecord`, and a
+  malformed protocol freeze time is refused. Schemas are unchanged.
 - The comparison gate passed when no candidate could have failed. When A's yield is
   below the margin in every cluster, including when both configurations submit
   nothing (a broken runner or grader looks like this), every B was non-inferior by
