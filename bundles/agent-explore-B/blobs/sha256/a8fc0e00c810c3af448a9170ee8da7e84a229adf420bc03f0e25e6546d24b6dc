@@ -1,0 +1,15 @@
+[
+  {
+    "cwe": 639,
+    "locations": [
+      {
+        "file": "invoicer/service.py",
+        "symbol": "get_invoice",
+        "start_line": 40,
+        "end_line": 45,
+        "role": "site"
+      }
+    ],
+    "description": "The get_invoice function validates that the user is a member of the supplied tenant but fails to verify that the retrieved invoice actually belongs to that tenant, allowing cross-tenant IDOR (information disclosure)."
+  }
+]

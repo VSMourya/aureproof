@@ -1,0 +1,93 @@
+{
+  "schema": "aureproof.labels/v0.1",
+  "task_id": "path-001",
+  "task_revision": "0.1.0-draft",
+  "cluster_id": "path-001",
+  "canary": "5b6ad745-3f06-45a5-af30-f61d28d3a3f2",
+  "oracle_canary": "b5cd076f-88d2-48b6-9d9e-4a7da599a96b",
+  "defects": [
+    {
+      "defect_id": "path-001-d1",
+      "variants": [
+        "vulnerable"
+      ],
+      "summary": "download_attachment checks the raw, percent-encoded name with is_plain_name and only then decodes it, so a name such as %2e%2e%2f%2e%2e%2foutside.txt passes the check, decodes to ../../outside.txt and reads a file outside the attachments directory through handle_request. upload_attachment and read_report decode first and confine the path with safe_join.",
+      "accepted_cwes": [
+        22,
+        23,
+        36,
+        73,
+        179,
+        180
+      ],
+      "anchors": [
+        {
+          "file": "reportvault/service.py",
+          "symbol": "download_attachment",
+          "line_range": [
+            28,
+            32
+          ],
+          "role": "site"
+        },
+        {
+          "file": "reportvault/api.py",
+          "symbol": "handle_request",
+          "line_range": [
+            19,
+            45
+          ],
+          "role": "source"
+        }
+      ],
+      "calibration_poc": "calibration_poc.py"
+    }
+  ],
+  "focal_negative": {
+    "variant": "repaired",
+    "anchors": [
+      {
+        "file": "reportvault/service.py",
+        "symbol": "download_attachment",
+        "line_range": [
+          28,
+          33
+        ],
+        "role": "site"
+      },
+      {
+        "file": "reportvault/api.py",
+        "symbol": "handle_request",
+        "line_range": [
+          19,
+          45
+        ],
+        "role": "source"
+      }
+    ]
+  },
+  "reviewed_negative_scope": [
+    {
+      "file": "reportvault/service.py",
+      "symbol": "upload_attachment",
+      "note": "decoy: decodes before checking the name, then confines the path with safe_join"
+    },
+    {
+      "file": "reportvault/service.py",
+      "symbol": "read_report",
+      "note": "decoy: no name check of its own, but safe_join resolves the decoded name and refuses escapes"
+    },
+    {
+      "file": "reportvault/service.py",
+      "symbol": "render_template",
+      "note": "decoy: the caller picks a key of the fixed TEMPLATES map, never a path; values fill a trusted format string"
+    },
+    {
+      "file": "reportvault/service.py",
+      "symbol": "list_attachments"
+    },
+    {
+      "file": "reportvault/storage.py"
+    }
+  ]
+}

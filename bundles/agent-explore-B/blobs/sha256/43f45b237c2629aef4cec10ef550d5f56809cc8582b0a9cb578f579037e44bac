@@ -1,0 +1,15 @@
+[
+  {
+    "cwe": 285,
+    "locations": [
+      {
+        "file": "portalauth/service.py",
+        "symbol": "finish_logout",
+        "start_line": 30,
+        "end_line": 32,
+        "role": "source"
+      }
+    ],
+    "description": "The logout endpoint removes a session identifier without any authentication or authorization check, allowing an attacker to terminate any user's session (CWE-285: Improper Authorization)."
+  }
+]

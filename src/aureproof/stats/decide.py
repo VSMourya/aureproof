@@ -29,17 +29,23 @@ def _interval(bounds: tuple[float, float] | None) -> Interval:
 
 
 def decide(protocol: DecisionProtocol, rows: Sequence[ClusterRow]) -> Decision:
-    """Pass if CI lower > -margin; fail if CI upper < -margin; otherwise inconclusive."""
+    """Pass if CI lower > -margin and some B could have failed; fail if CI upper < -margin.
+
+    Otherwise inconclusive (specs/decision §5).
+    """
     policy = protocol.estimand.undefined_yield
     alpha = protocol.test.alpha
     table: list[ClusterRow] = []
     diffs: list[Fraction] = []
+    baseline: list[Fraction] = []  # A's yield in each cluster that enters the test
     for row in rows:
         a = _rate(row.a_confirmed, row.a_submitted, policy)
         b = _rate(row.b_confirmed, row.b_submitted, policy)
-        diff = None if a is None or b is None else b - a
-        if diff is not None:
+        diff = None
+        if a is not None and b is not None:
+            diff = b - a
             diffs.append(diff)
+            baseline.append(a)
         table.append(row.model_copy(update={"difference": _fmt(diff)}))
     needed = min_clusters(alpha)
     wa = _interval(
@@ -96,4 +102,15 @@ def decide(protocol: DecisionProtocol, rows: Sequence[ClusterRow]) -> Decision:
     if protocol.require_complete_adjudication and unresolved and provisional != "inconclusive":
         reason = f"provisional {provisional}, but {unresolved} findings are not adjudicated"
         return build("inconclusive", provisional, reason, **stats)
+    if provisional == "pass":
+        # Every subset mean rises with each d_c, so B's worst case on these clusters is a
+        # yield of 0 everywhere (d_c = -a_c). If even that passes, the data could not
+        # have said anything else: the baseline leaves no room to measure a regression.
+        worst = sign_flip([-a for a in baseline], alpha).lower
+        if worst is not None and worst > -margin:
+            reason = (
+                f"provisional pass, but no B could have failed: with B's yield 0 in every "
+                f"cluster the CI lower bound would still be {worst} > -margin {-margin}"
+            )
+            return build("inconclusive", provisional, reason, **stats)
     return build(provisional, provisional, reason, **stats)

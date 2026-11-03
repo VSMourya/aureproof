@@ -1,0 +1,28 @@
+[
+  {
+    "cwe": 200,
+    "locations": [
+      {
+        "file": "reportvault/service.py",
+        "symbol": "list_attachments",
+        "start_line": 36,
+        "end_line": 37,
+        "role": "site"
+      }
+    ],
+    "description": "list_attachments returns all files in the attachments directory, including hidden files (names starting with '.') that are not meant to be exposed. This can leak sensitive data stored on disk."
+  },
+  {
+    "cwe": 20,
+    "locations": [
+      {
+        "file": "reportvault/service.py",
+        "symbol": "read_report",
+        "start_line": 40,
+        "end_line": 41,
+        "role": "site"
+      }
+    ],
+    "description": "read_report does not validate the decoded name with is_plain_name, allowing callers to read hidden or nested files (e.g., .secret or subdir/file) inside the reports directory, leading to unintended information disclosure."
+  }
+]

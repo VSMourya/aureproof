@@ -1,0 +1,36 @@
+[
+  {
+    "cwe": 601,
+    "locations": [
+      {
+        "file": "portalauth/api.py",
+        "symbol": "handle_request",
+        "start_line": 18,
+        "end_line": 20,
+        "role": "source"
+      },
+      {
+        "file": "portalauth/urls.py",
+        "symbol": "is_local_path",
+        "start_line": 87,
+        "end_line": 92,
+        "role": "site"
+      },
+      {
+        "file": "portalauth/api.py",
+        "symbol": "handle_request",
+        "start_line": 28,
+        "end_line": 28,
+        "role": "sink"
+      },
+      {
+        "file": "portalauth/api.py",
+        "symbol": "handle_request",
+        "start_line": 30,
+        "end_line": 30,
+        "role": "sink"
+      }
+    ],
+    "description": "The attacker-controlled 'next' parameter is filtered by is_local_path, which only checks the raw string prefix and then trusts urlsplit; urlsplit strips embedded ASCII tab/CR/LF, so '/\\t\\t//evil.com' (='///evil.com' after stripping) is seen as a local path with empty netloc and returned as the 302 Location. Browsers strip those same control characters but parse '///evil.com' as a scheme-relative URL (extra slashes are skipped in the whatwg 'special authority ignore slashes' state), so a crafted link such as ?action=logout&value=x&next=/\\t\\t//evil.com (or the login action, which redirects right after issuing a session) bounces victims to an attacker-controlled origin for phishing; the logout path requires no credentials at all."
+  }
+]

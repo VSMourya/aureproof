@@ -1,0 +1,42 @@
+[
+  {
+    "cwe": 22,
+    "locations": [
+      {
+        "file": "reportvault/api.py",
+        "symbol": "handle_request",
+        "start_line": 34,
+        "end_line": 35,
+        "role": "source"
+      },
+      {
+        "file": "reportvault/service.py",
+        "symbol": "read_report",
+        "start_line": 40,
+        "end_line": 41,
+        "role": "sink"
+      }
+    ],
+    "description": "read_report never validates the decoded report name with is_plain_name (unlike upload_attachment/download_attachment); it relies only on safe_join, which anchors the result inside vault.reports but allows separators and dotfiles. Because names are percent-decoded before use, a request such as {\"action\": \"report\", \"name\": \"alice%2Fq4.pdf\"} or \".secrets%2Fkeys.txt\" reads files in nested or hidden subdirectories of the reports directory (e.g. another tenant's report folder), bypassing the flat single-file-name policy enforced for attachments; verified to return such files' contents."
+  },
+  {
+    "cwe": 248,
+    "locations": [
+      {
+        "file": "reportvault/service.py",
+        "symbol": "read_report",
+        "start_line": 40,
+        "end_line": 41,
+        "role": "site"
+      },
+      {
+        "file": "reportvault/api.py",
+        "symbol": "handle_request",
+        "start_line": 41,
+        "end_line": 44,
+        "role": "site"
+      }
+    ],
+    "description": "Because the report action never applies is_plain_name (which rejects NUL bytes), a crafted name such as \"a%00b\" decodes to a path containing a NUL character, and Path resolution/read raises a ValueError ('embedded null character'); an overlong name similarly raises OSError. handle_request only catches BadName/OutsideVault/KeyError and a few OSError subclasses, so these exceptions propagate uncaught and crash the request, a remote denial-of-service vector (demonstrated for both inputs)."
+  }
+]

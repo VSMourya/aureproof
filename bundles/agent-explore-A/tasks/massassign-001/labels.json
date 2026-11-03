@@ -1,0 +1,89 @@
+{
+  "schema": "aureproof.labels/v0.1",
+  "task_id": "massassign-001",
+  "task_revision": "0.1.0-draft",
+  "cluster_id": "massassign-001",
+  "canary": "bc7be4bb-329f-4b66-b449-21b81c3c246e",
+  "oracle_canary": "3af06b78-4c0c-4767-9bce-96694770258f",
+  "defects": [
+    {
+      "defect_id": "massassign-001-d1",
+      "variants": [
+        "vulnerable"
+      ],
+      "summary": "update_profile lets a member change their own profile, but it applies every key that names an attribute of User instead of the SELF_EDITABLE fields, so a member who sends role: admin through handle_request makes themselves an admin (is_active and username can be set the same way). admin_update and update_settings apply explicit allowlists.",
+      "accepted_cwes": [
+        269,
+        284,
+        915
+      ],
+      "anchors": [
+        {
+          "file": "profilehub/service.py",
+          "symbol": "update_profile",
+          "line_range": [
+            22,
+            31
+          ],
+          "role": "site"
+        },
+        {
+          "file": "profilehub/api.py",
+          "symbol": "handle_request",
+          "line_range": [
+            18,
+            41
+          ],
+          "role": "source"
+        }
+      ],
+      "calibration_poc": "calibration_poc.py"
+    }
+  ],
+  "focal_negative": {
+    "variant": "repaired",
+    "anchors": [
+      {
+        "file": "profilehub/service.py",
+        "symbol": "update_profile",
+        "line_range": [
+          22,
+          31
+        ],
+        "role": "site"
+      },
+      {
+        "file": "profilehub/api.py",
+        "symbol": "handle_request",
+        "line_range": [
+          18,
+          41
+        ],
+        "role": "source"
+      }
+    ]
+  },
+  "reviewed_negative_scope": [
+    {
+      "file": "profilehub/service.py",
+      "symbol": "admin_update",
+      "note": "decoy: may change role, but only for an admin actor and only fields in ADMIN_EDITABLE"
+    },
+    {
+      "file": "profilehub/service.py",
+      "symbol": "update_settings",
+      "note": "decoy: applies only keys in the SETTINGS allowlist, coerced to bool"
+    },
+    {
+      "file": "profilehub/service.py",
+      "symbol": "deactivate",
+      "note": "decoy: only the member themselves or an admin"
+    },
+    {
+      "file": "profilehub/models.py"
+    },
+    {
+      "file": "profilehub/store.py"
+    }
+  ]
+}

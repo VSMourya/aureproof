@@ -1234,6 +1234,596 @@
         "upper": null,
         "clusters": 5
       }
+    },
+    {
+      "id": "D-11",
+      "title": "Vacuous pass: the baseline confirmed nothing, so no candidate could fail; inconclusive",
+      "derivation": "A submits 3 findings per cluster and none is confirmed (yield 0); B submits nothing (undefined, 0 under the default policy). All d_c = 0, so p = 64/64 = 1 and L = U = 0 > -0.05: a provisional pass. Worst case for B (yield 0 in every cluster): d_c = -0 = 0, L = 0 > -0.05, so a pass was certain whatever B did. Outcome inconclusive.",
+      "protocol": {
+        "protocol_version": "0.1",
+        "name": "vector",
+        "cohort": [
+          {
+            "task_identity": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c1"
+          },
+          {
+            "task_identity": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c2"
+          },
+          {
+            "task_identity": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c3"
+          },
+          {
+            "task_identity": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c4"
+          },
+          {
+            "task_identity": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c5"
+          },
+          {
+            "task_identity": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c6"
+          }
+        ],
+        "configurations": {
+          "A": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "B": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        },
+        "repetitions": 3,
+        "margin": 0.05
+      },
+      "rows": [
+        {
+          "cluster_id": "c1",
+          "a_confirmed": 0,
+          "a_submitted": 3,
+          "b_confirmed": 0,
+          "b_submitted": 0,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c2",
+          "a_confirmed": 0,
+          "a_submitted": 3,
+          "b_confirmed": 0,
+          "b_submitted": 0,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c3",
+          "a_confirmed": 0,
+          "a_submitted": 3,
+          "b_confirmed": 0,
+          "b_submitted": 0,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c4",
+          "a_confirmed": 0,
+          "a_submitted": 3,
+          "b_confirmed": 0,
+          "b_submitted": 0,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c5",
+          "a_confirmed": 0,
+          "a_submitted": 3,
+          "b_confirmed": 0,
+          "b_submitted": 0,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c6",
+          "a_confirmed": 0,
+          "a_submitted": 3,
+          "b_confirmed": 0,
+          "b_submitted": 0,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        }
+      ],
+      "expected": {
+        "outcome": "inconclusive",
+        "provisional_outcome": "pass",
+        "mean_difference": "0/1",
+        "p_value_two_sided": "1/1",
+        "lower": "0/1",
+        "upper": "0/1",
+        "clusters": 6
+      }
+    },
+    {
+      "id": "D-12",
+      "title": "Vacuous pass: both configurations silent everywhere, as a broken runner or grader would be",
+      "derivation": "Every cluster is 0/0 on both sides, so both yields are 0 under the default policy and all d_c = 0: p = 1, L = U = 0, a provisional pass. The worst case for B is the same data, L = 0 > -0.05: vacuous, inconclusive.",
+      "protocol": {
+        "protocol_version": "0.1",
+        "name": "vector",
+        "cohort": [
+          {
+            "task_identity": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c1"
+          },
+          {
+            "task_identity": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c2"
+          },
+          {
+            "task_identity": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c3"
+          },
+          {
+            "task_identity": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c4"
+          },
+          {
+            "task_identity": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c5"
+          },
+          {
+            "task_identity": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c6"
+          }
+        ],
+        "configurations": {
+          "A": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "B": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        },
+        "repetitions": 3,
+        "margin": 0.05
+      },
+      "rows": [
+        {
+          "cluster_id": "c1",
+          "a_confirmed": 0,
+          "a_submitted": 0,
+          "b_confirmed": 0,
+          "b_submitted": 0,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c2",
+          "a_confirmed": 0,
+          "a_submitted": 0,
+          "b_confirmed": 0,
+          "b_submitted": 0,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c3",
+          "a_confirmed": 0,
+          "a_submitted": 0,
+          "b_confirmed": 0,
+          "b_submitted": 0,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c4",
+          "a_confirmed": 0,
+          "a_submitted": 0,
+          "b_confirmed": 0,
+          "b_submitted": 0,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c5",
+          "a_confirmed": 0,
+          "a_submitted": 0,
+          "b_confirmed": 0,
+          "b_submitted": 0,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c6",
+          "a_confirmed": 0,
+          "a_submitted": 0,
+          "b_confirmed": 0,
+          "b_submitted": 0,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        }
+      ],
+      "expected": {
+        "outcome": "inconclusive",
+        "provisional_outcome": "pass",
+        "mean_difference": "0/1",
+        "p_value_two_sided": "1/1",
+        "lower": "0/1",
+        "upper": "0/1",
+        "clusters": 6
+      }
+    },
+    {
+      "id": "D-13",
+      "title": "Vacuous pass: baseline yield below the margin in every cluster, even with a better B",
+      "derivation": "A = 1/25 and B = 1/5 in every cluster, so d_c = 4/25, p = 2/64 = 1/32, L = U = 4/25 > -0.05: a provisional pass. Worst case for B: d_c = -1/25, L = -1/25 > -1/20, so no B could fail. Inconclusive; to claim that B beats a weak baseline, pre-register margin 0 (D-14).",
+      "protocol": {
+        "protocol_version": "0.1",
+        "name": "vector",
+        "cohort": [
+          {
+            "task_identity": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c1"
+          },
+          {
+            "task_identity": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c2"
+          },
+          {
+            "task_identity": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c3"
+          },
+          {
+            "task_identity": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c4"
+          },
+          {
+            "task_identity": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c5"
+          },
+          {
+            "task_identity": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c6"
+          }
+        ],
+        "configurations": {
+          "A": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "B": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        },
+        "repetitions": 3,
+        "margin": 0.05
+      },
+      "rows": [
+        {
+          "cluster_id": "c1",
+          "a_confirmed": 1,
+          "a_submitted": 25,
+          "b_confirmed": 1,
+          "b_submitted": 5,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c2",
+          "a_confirmed": 1,
+          "a_submitted": 25,
+          "b_confirmed": 1,
+          "b_submitted": 5,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c3",
+          "a_confirmed": 1,
+          "a_submitted": 25,
+          "b_confirmed": 1,
+          "b_submitted": 5,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c4",
+          "a_confirmed": 1,
+          "a_submitted": 25,
+          "b_confirmed": 1,
+          "b_submitted": 5,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c5",
+          "a_confirmed": 1,
+          "a_submitted": 25,
+          "b_confirmed": 1,
+          "b_submitted": 5,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c6",
+          "a_confirmed": 1,
+          "a_submitted": 25,
+          "b_confirmed": 1,
+          "b_submitted": 5,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        }
+      ],
+      "expected": {
+        "outcome": "inconclusive",
+        "provisional_outcome": "pass",
+        "mean_difference": "4/25",
+        "p_value_two_sided": "1/32",
+        "lower": "4/25",
+        "upper": "4/25",
+        "clusters": 6
+      }
+    },
+    {
+      "id": "D-14",
+      "title": "Weak baseline with margin 0: the superiority pass is informative, not vacuous",
+      "derivation": "The D-13 data under margin 0. L = 4/25 > 0: pass. Worst case for B: L = -1/25, which is not > 0, so a B with yield 0 would not have passed. The pass stands.",
+      "protocol": {
+        "protocol_version": "0.1",
+        "name": "vector",
+        "cohort": [
+          {
+            "task_identity": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c1"
+          },
+          {
+            "task_identity": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c2"
+          },
+          {
+            "task_identity": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c3"
+          },
+          {
+            "task_identity": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c4"
+          },
+          {
+            "task_identity": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c5"
+          },
+          {
+            "task_identity": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c6"
+          }
+        ],
+        "configurations": {
+          "A": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "B": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        },
+        "repetitions": 3,
+        "margin": 0
+      },
+      "rows": [
+        {
+          "cluster_id": "c1",
+          "a_confirmed": 1,
+          "a_submitted": 25,
+          "b_confirmed": 1,
+          "b_submitted": 5,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c2",
+          "a_confirmed": 1,
+          "a_submitted": 25,
+          "b_confirmed": 1,
+          "b_submitted": 5,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c3",
+          "a_confirmed": 1,
+          "a_submitted": 25,
+          "b_confirmed": 1,
+          "b_submitted": 5,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c4",
+          "a_confirmed": 1,
+          "a_submitted": 25,
+          "b_confirmed": 1,
+          "b_submitted": 5,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c5",
+          "a_confirmed": 1,
+          "a_submitted": 25,
+          "b_confirmed": 1,
+          "b_submitted": 5,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c6",
+          "a_confirmed": 1,
+          "a_submitted": 25,
+          "b_confirmed": 1,
+          "b_submitted": 5,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        }
+      ],
+      "expected": {
+        "outcome": "pass",
+        "provisional_outcome": "pass",
+        "mean_difference": "4/25",
+        "p_value_two_sided": "1/32",
+        "lower": "4/25",
+        "upper": "4/25",
+        "clusters": 6
+      }
+    },
+    {
+      "id": "D-15",
+      "title": "Mostly silent baseline: one measurable cluster makes the pass informative",
+      "derivation": "A = 0/2 in five clusters and 1/2 in c6; B equals A. All d_c = 0: p = 1, L = U = 0 > -0.05, pass. Worst case for B: d = (0, 0, 0, 0, 0, -1/2); r = 1, so L = the smallest subset mean = -1/2 < -0.05: a B with yield 0 would not have passed. The pass stands; the rule is exact, not 'A is zero somewhere'.",
+      "protocol": {
+        "protocol_version": "0.1",
+        "name": "vector",
+        "cohort": [
+          {
+            "task_identity": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c1"
+          },
+          {
+            "task_identity": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c2"
+          },
+          {
+            "task_identity": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c3"
+          },
+          {
+            "task_identity": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c4"
+          },
+          {
+            "task_identity": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c5"
+          },
+          {
+            "task_identity": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c6"
+          }
+        ],
+        "configurations": {
+          "A": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "B": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        },
+        "repetitions": 3,
+        "margin": 0.05
+      },
+      "rows": [
+        {
+          "cluster_id": "c1",
+          "a_confirmed": 0,
+          "a_submitted": 2,
+          "b_confirmed": 0,
+          "b_submitted": 2,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c2",
+          "a_confirmed": 0,
+          "a_submitted": 2,
+          "b_confirmed": 0,
+          "b_submitted": 2,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c3",
+          "a_confirmed": 0,
+          "a_submitted": 2,
+          "b_confirmed": 0,
+          "b_submitted": 2,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c4",
+          "a_confirmed": 0,
+          "a_submitted": 2,
+          "b_confirmed": 0,
+          "b_submitted": 2,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c5",
+          "a_confirmed": 0,
+          "a_submitted": 2,
+          "b_confirmed": 0,
+          "b_submitted": 2,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        },
+        {
+          "cluster_id": "c6",
+          "a_confirmed": 1,
+          "a_submitted": 2,
+          "b_confirmed": 1,
+          "b_submitted": 2,
+          "a_unresolved": 0,
+          "b_unresolved": 0,
+          "difference": null
+        }
+      ],
+      "expected": {
+        "outcome": "pass",
+        "provisional_outcome": "pass",
+        "mean_difference": "0/1",
+        "p_value_two_sided": "1/1",
+        "lower": "0/1",
+        "upper": "0/1",
+        "clusters": 6
+      }
     }
   ],
   "invalid_protocols": {

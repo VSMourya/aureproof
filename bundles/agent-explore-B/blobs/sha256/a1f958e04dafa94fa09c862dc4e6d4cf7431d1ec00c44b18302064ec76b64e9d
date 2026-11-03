@@ -1,0 +1,42 @@
+[
+  {
+    "cwe": 284,
+    "locations": [
+      {
+        "file": "docstore/service.py",
+        "symbol": "DocumentStore.add",
+        "start_line": 25,
+        "end_line": 27,
+        "role": "site"
+      }
+    ],
+    "description": "DocumentStore.add overwrites existing documents without any access control or existence check, allowing an attacker with write access to replace or delete other users' documents (Improper Access Control)."
+  },
+  {
+    "cwe": 200,
+    "locations": [
+      {
+        "file": "docstore/service.py",
+        "symbol": "read_document PermissionDenied",
+        "start_line": 47,
+        "end_line": 47,
+        "role": "site"
+      },
+      {
+        "file": "docstore/service.py",
+        "symbol": "update_document PermissionDenied",
+        "start_line": 54,
+        "end_line": 54,
+        "role": "site"
+      },
+      {
+        "file": "docstore/service.py",
+        "symbol": "delete_document PermissionDenied",
+        "start_line": 63,
+        "end_line": 63,
+        "role": "site"
+      }
+    ],
+    "description": "PermissionDenied exceptions include the actor's user_id and document id in the error message, which can be returned to callers and may disclose internal identifiers, leading to information exposure."
+  }
+]

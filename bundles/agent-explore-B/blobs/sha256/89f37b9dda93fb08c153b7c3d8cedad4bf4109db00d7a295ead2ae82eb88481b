@@ -1,0 +1,15 @@
+[
+  {
+    "cwe": 22,
+    "locations": [
+      {
+        "file": "reportvault/service.py",
+        "symbol": "read_report",
+        "start_line": 40,
+        "end_line": 41,
+        "role": "site"
+      }
+    ],
+    "description": "The `read_report` function does not validate the decoded name with `is_plain_name`, allowing a caller to request files in subdirectories (e.g. `subdir/report.pdf`). This can be abused to read arbitrary files within the vault's reports directory, including hidden files, constituting a path‑traversal (CWE‑22) vulnerability."
+  }
+]

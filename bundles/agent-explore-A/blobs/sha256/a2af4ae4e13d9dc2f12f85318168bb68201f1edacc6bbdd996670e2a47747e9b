@@ -1,0 +1,29 @@
+[
+  {
+    "cwe": 862,
+    "locations": [
+      {
+        "file": "docstore/api.py",
+        "symbol": "handle_request",
+        "start_line": 18,
+        "end_line": 18,
+        "role": "source"
+      },
+      {
+        "file": "docstore/service.py",
+        "symbol": "delete_document",
+        "start_line": 60,
+        "end_line": 63,
+        "role": "site"
+      },
+      {
+        "file": "docstore/service.py",
+        "symbol": "delete_document",
+        "start_line": 62,
+        "end_line": 62,
+        "role": "sink"
+      }
+    ],
+    "description": "delete_document deletes a document by id without any authorization check (unlike read_document/update_document, which enforce can_read/can_modify). Since handle_request dispatches the \"delete\" action with an attacker-controlled doc_id, any user can destroy documents owned by other users (insecure direct object reference / broken object-level authorization)."
+  }
+]

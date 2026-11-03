@@ -1,0 +1,29 @@
+[
+  {
+    "cwe": 22,
+    "locations": [
+      {
+        "file": "reportvault/service.py",
+        "symbol": "read_report",
+        "start_line": 40,
+        "end_line": 41,
+        "role": "site"
+      },
+      {
+        "file": "reportvault/api.py",
+        "symbol": "handle_request",
+        "start_line": 84,
+        "end_line": 85,
+        "role": "source"
+      },
+      {
+        "file": "reportvault/service.py",
+        "symbol": "read_report",
+        "start_line": 41,
+        "end_line": 41,
+        "role": "sink"
+      }
+    ],
+    "description": "read_report is the only name-taking vault operation that skips the is_plain_name() validation applied by upload_attachment/download_attachment, so an attacker-controlled report name (e.g. 'sub%2F..%2F..%2Fdata' or 'nested%2Fsecret.txt') containing path separators and traversal sequences reaches the filesystem. Any file anywhere under the reports tree (including nested or dot-named subdirectories that the service's own naming policy excludes) is readable; only safe_join's resolve-and-contain check prevents escaping reports entirely, and the unvalidated name also lets a null byte ('a%00b') through, which raises an uncaught ValueError that bypasses handle_request's 400/404 error mapping and crashes request handling."
+  }
+]
