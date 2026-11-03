@@ -18,7 +18,7 @@ uv run --extra sign aureproof compare \
 | Exit | Outcome | Meaning |
 | --- | --- | --- |
 | 0 | pass | The exact CI's lower bound is above −margin |
-| 1 | fail | The CI's upper bound is below −margin |
+| 1 | fail | The CI's upper bound is below −margin, or a registered guardrail (known-defect recall) fails |
 | 3 | inconclusive | Anything else: the CI spans −margin, fewer clusters than the protocol's alpha allows, findings left unadjudicated, or a vacuous pass (A's yields are so low that B would pass even with yield 0 everywhere) |
 | 2 | not comparable | The evidence does not belong to the protocol; no decision is made |
 

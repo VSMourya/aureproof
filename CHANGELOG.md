@@ -12,6 +12,13 @@ public API and the specs may change between minor versions).
 ## [Unreleased]
 
 ### Added
+- Decision protocols may register a `known_defect_recall` guardrail with its own margin
+  (specs/decision §5 rule 6). Strict confirmed yield is a precision, so a candidate that
+  reports only its surest finding, or nothing where A did well, raised its yield and
+  passed while finding less (vectors G-01, G-02). With the guardrail, the recall
+  difference gets the same exact test; any fail is a fail and a pass needs both.
+  Cluster rows carry recall support (`credited`, `positives`). A protocol without
+  guardrails serializes as before and keeps its identity.
 - The exploratory agent comparison ran under its signed protocol: the reference
   subject on Kimi-K3 (A) and gpt-oss-120b (B), 36 episodes each on the six public
   pairs (`bundles/agent-explore-A/`, `bundles/agent-explore-B/`). Both bundles are

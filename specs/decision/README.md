@@ -35,6 +35,7 @@ seeing the data.
 | `stopping` | Fixed repetitions, no peeking; exploratory analyses listed in advance |
 | `require_complete_adjudication` | Always `true` in v0.1 |
 | `pilot_mde` | Minimum detectable effect from the pilot (#52) |
+| `guardrails[]` | Optional `{metric, margin}`; v0.1 allows `known_defect_recall` once, with its own δ ≥ 0 (rule 6). An empty list is not serialized, so a protocol without guardrails keeps the identity it had before the field existed |
 
 ## 3. Cluster table
 
@@ -42,7 +43,9 @@ For each cluster, pool the graded episodes of each configuration, giving
 `confirmed/submitted` per side. That is the cluster's yield (a cluster with
 `submitted = 0` follows `undefined_yield`). The cluster difference is
 `d_c = yield_B − yield_A`, computed **exactly** as a rational. The Decision reports
-every row.
+every row. Each row also carries known-defect recall support per side (`credited`,
+`positives`: defects the matcher credited and defects present, over graded episodes),
+which a guardrail uses; it follows the same `undefined_yield` policy when `positives = 0`.
 
 ## 4. Test and interval
 
@@ -85,6 +88,18 @@ With interval [L, U] and margin δ:
    grader would. A fail can never be vacuous: with B's yield 1 everywhere, every dᶜ ≥ 0,
    so U ≥ 0 ≥ −δ. To claim that B beats a weak baseline, pre-register δ = 0 (vectors
    D-11 to D-15). Rule 4 is applied first.
+
+6. **Guardrails:** strict confirmed yield is a precision, so volume cannot raise it, but
+   restraint can. A B that reports only its surest finding, or nothing where A did well
+   (under `exclude_cluster` those clusters leave the test), raises its yield while finding
+   less. For each registered guardrail, the per-cluster difference of that metric gets the
+   same exact test and interval (rules 1–3) against its own margin. The outcome is
+   **fail** if the primary test or any guardrail fails, **pass** only if all pass, and
+   **inconclusive** otherwise (an intersection–union test: a pass is still an α-level
+   claim; a false fail can reach up to (1 + guardrails)·α). Recall counts defects the
+   matcher credited, which adjudication does not change, so a guardrail fail is final
+   while findings are unadjudicated (vectors G-01 to G-04). Rules 4 and 5 apply to the
+   primary test before it is combined; a guardrail uses rules 1–3 only.
 
 ## 6. Review questions and their resolutions
 

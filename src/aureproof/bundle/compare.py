@@ -223,6 +223,16 @@ def _adjudicated(
     return problems, totals
 
 
+def _recall(pairs: list[tuple[str, str, EpisodeScore]]) -> dict[str, tuple[int, int]]:
+    """Per task (defects credited, defects present) over graded episodes, as the metric."""
+    totals: dict[str, tuple[int, int]] = {}
+    for task_id, _, score in pairs:
+        if score.graded:
+            credited, present = totals.get(task_id, (0, 0))
+            totals[task_id] = (credited + len(score.credited), present + score.positives)
+    return totals
+
+
 def compare(
     protocol: DecisionProtocol,
     files_a: Mapping[str, bytes],
@@ -249,12 +259,15 @@ def compare(
         raise GateError(problems)
 
     rows = []
+    recall_a, recall_b = _recall(pairs_a), _recall(pairs_b)
     cluster_tasks: dict[str, list[str]] = {}
     for task_id, cluster in clusters_a.items():
         cluster_tasks.setdefault(cluster, []).append(task_id)
     for cluster, tasks in sorted(cluster_tasks.items()):
         a = [sum(totals_a.get(t, (0, 0, 0))[i] for t in tasks) for i in range(3)]
         b = [sum(totals_b.get(t, (0, 0, 0))[i] for t in tasks) for i in range(3)]
+        ra = [sum(recall_a.get(t, (0, 0))[i] for t in tasks) for i in range(2)]
+        rb = [sum(recall_b.get(t, (0, 0))[i] for t in tasks) for i in range(2)]
         rows.append(
             ClusterRow(
                 cluster_id=cluster,
@@ -265,6 +278,10 @@ def compare(
                 a_unresolved=a[1],
                 b_unresolved=b[1],
                 difference=None,
+                a_credited=ra[0],
+                a_positives=ra[1],
+                b_credited=rb[0],
+                b_positives=rb[1],
             )
         )
     return Comparison(
