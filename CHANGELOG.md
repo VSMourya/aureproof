@@ -42,7 +42,27 @@ public API and the specs may change between minor versions).
   on Kimi-K3 (A) and gpt-oss-120b (B) on the six public pairs, with their THRs. It is
   development data, not the pre-registered assessment.
 
+### Changed
+- The exact sign-flip runs in integers: the cluster differences are scaled by their
+  least common denominator, every subset sum is built once, and the subset means are
+  ordered by exact integer keys. Results are identical to the Fraction enumeration
+  (a property test keeps the old implementation as its oracle); 20 clusters take
+  about 0.4 s instead of about 27 s.
+
 ### Fixed
+- A Decision Protocol whose cohort names more than 20 clusters was accepted and
+  signed, and the gate then crashed with a `ValueError` when it ran after the
+  assessment. Such a protocol is now invalid when it is written (conformance vector
+  `too-many-clusters`), and `decide` reports more than 20 rows as inconclusive
+  instead of raising. Protocols with too few clusters to decide stay valid.
+- `aureproof compare` trusted the health records a decision rests on. It never checked a
+  pinned THR's `status` (only the runner's `slice.plan` refused a THR that is not
+  healthy), and never checked that the THR vouched for the grader that scored the run:
+  its `scoring_identity` was recorded and never read. The gate now fails closed when a
+  pinned THR is `unhealthy` or `unknown`, when its scoring identity differs from the
+  seal's `scoring_profile`, when the seal names no readable profile, or when a re-scored
+  episode carries another identity than the seal names. Every committed example and
+  bundle pins healthy THRs under the current identity, so no result changes.
 - Timestamps were ordered as strings, but `UtcTimestamp` allows an optional fraction of
   any length, so `…00:00:00.5Z` sorted before `…00:00:00Z`. A Task Health Record frozen
   half a second after the protocol freeze was applied as pre-registered and could exclude

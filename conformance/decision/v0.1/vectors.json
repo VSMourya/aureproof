@@ -2277,6 +2277,126 @@
           }
         ]
       }
+    },
+    "too-many-clusters": {
+      "description": "The exact gate enumerates 2^k sign assignments: a cohort names at most 20 clusters.",
+      "instance": {
+        "protocol_version": "0.1",
+        "name": "vector",
+        "cohort": [
+          {
+            "task_identity": "sha256:0000000000000000000000000000000000000000000000000000000000000001",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c1"
+          },
+          {
+            "task_identity": "sha256:0000000000000000000000000000000000000000000000000000000000000002",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c2"
+          },
+          {
+            "task_identity": "sha256:0000000000000000000000000000000000000000000000000000000000000003",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c3"
+          },
+          {
+            "task_identity": "sha256:0000000000000000000000000000000000000000000000000000000000000004",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c4"
+          },
+          {
+            "task_identity": "sha256:0000000000000000000000000000000000000000000000000000000000000005",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c5"
+          },
+          {
+            "task_identity": "sha256:0000000000000000000000000000000000000000000000000000000000000006",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c6"
+          },
+          {
+            "task_identity": "sha256:0000000000000000000000000000000000000000000000000000000000000007",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c7"
+          },
+          {
+            "task_identity": "sha256:0000000000000000000000000000000000000000000000000000000000000008",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c8"
+          },
+          {
+            "task_identity": "sha256:0000000000000000000000000000000000000000000000000000000000000009",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c9"
+          },
+          {
+            "task_identity": "sha256:000000000000000000000000000000000000000000000000000000000000000a",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c10"
+          },
+          {
+            "task_identity": "sha256:000000000000000000000000000000000000000000000000000000000000000b",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c11"
+          },
+          {
+            "task_identity": "sha256:000000000000000000000000000000000000000000000000000000000000000c",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c12"
+          },
+          {
+            "task_identity": "sha256:000000000000000000000000000000000000000000000000000000000000000d",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c13"
+          },
+          {
+            "task_identity": "sha256:000000000000000000000000000000000000000000000000000000000000000e",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c14"
+          },
+          {
+            "task_identity": "sha256:000000000000000000000000000000000000000000000000000000000000000f",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c15"
+          },
+          {
+            "task_identity": "sha256:0000000000000000000000000000000000000000000000000000000000000010",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c16"
+          },
+          {
+            "task_identity": "sha256:0000000000000000000000000000000000000000000000000000000000000011",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c17"
+          },
+          {
+            "task_identity": "sha256:0000000000000000000000000000000000000000000000000000000000000012",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c18"
+          },
+          {
+            "task_identity": "sha256:0000000000000000000000000000000000000000000000000000000000000013",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c19"
+          },
+          {
+            "task_identity": "sha256:0000000000000000000000000000000000000000000000000000000000000014",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c20"
+          },
+          {
+            "task_identity": "sha256:0000000000000000000000000000000000000000000000000000000000000015",
+            "thr_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "cluster_id": "c21"
+          }
+        ],
+        "configurations": {
+          "A": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "B": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        },
+        "repetitions": 3,
+        "margin": 0.05
+      }
     }
   },
   "wilson": [

@@ -16,7 +16,7 @@ from aureproof.contracts.decision import (
     GuardrailResult,
     Interval,
 )
-from aureproof.stats.permutation import SignFlipResult, min_clusters, sign_flip
+from aureproof.stats.permutation import MAX_CLUSTERS, SignFlipResult, min_clusters, sign_flip
 from aureproof.stats.wilson import wilson
 
 Outcome = Literal["pass", "fail", "inconclusive"]
@@ -53,6 +53,9 @@ def _three_way(
     """The exact interval against -margin (§5 rules 1-3)."""
     if not diffs:
         return "inconclusive", "no cluster has a defined difference", None
+    if len(diffs) > MAX_CLUSTERS:  # a valid protocol cannot produce this many rows
+        reason = f"{len(diffs)} clusters exceed the exact enumeration limit of {MAX_CLUSTERS}"
+        return "inconclusive", reason, None
     result = sign_flip(diffs, alpha)
     if result.lower is None or result.upper is None:
         needed = min_clusters(alpha)
